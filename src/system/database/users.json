@@ -1,0 +1,28 @@
+[
+  {
+    "username": "admin",
+    "password": "admin",
+    "role": "admin",
+    "apikey": "Zqwis_5e7929082c52",
+    "limit": 1000,
+    "maxIpQuota": 10,
+    "whitelistIp": [
+      "182.62.149.149",
+      "127.0.0.1",
+      "10.54.249.244"
+    ],
+    "lastReset": 1778437575607,
+    "createdAt": "2026-05-08T17:41:13.229Z"
+  },
+  {
+    "username": "user",
+    "password": "user",
+    "role": "user",
+    "apikey": "Zqwis_c901fc38e55d",
+    "limit": 10,
+    "maxIpQuota": 3,
+    "whitelistIp": [],
+    "lastReset": 1778262115409,
+    "createdAt": "2026-05-08T17:41:55.409Z"
+  }
+]
