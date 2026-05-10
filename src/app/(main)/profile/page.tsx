@@ -139,13 +139,13 @@ PRIVILEGE: ADMIN
 <div className="space-y-1.5">
 <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5 pl-1">New Username</label>
 <div className="bg-card border border-black/5 dark:border-white/5 hover:bg-white dark:hover:bg-zinc-900 rounded shadow-inner focus-within:border-zinc-300 dark:focus-within:border-zinc-600 transition-all">
-<input type="text" placeholder="new_username" value={username} onChange={(e)=>setUsername(e.target.value)} className="w-full px-4 py-2.5 bg-transparent text-xs font-mono text-zinc-800 dark:text-zinc-200 focus:outline-none placeholder:text-zinc-400/20"" autoComplete="off" spellCheck="false" autoCapitalize="none" autoCorrect="off" />
+<input type="text" placeholder="new_username" value={username} onChange={(e)=>setUsername(e.target.value)} className="w-full px-4 py-2.5 bg-transparent text-xs font-mono text-zinc-800 dark:text-zinc-200 focus:outline-none placeholder:text-zinc-400/20" autoComplete="off" spellCheck="false" autoCapitalize="none" autoCorrect="off" />
 </div>
 </div>
 <div className="space-y-1.5">
 <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-1.5 pl-1">New Password</label>
 <div className="bg-card border border-black/5 dark:border-white/5 hover:bg-white dark:hover:bg-zinc-900 rounded shadow-inner focus-within:border-zinc-300 dark:focus-within:border-zinc-600 transition-all">
-<input type="password" placeholder="••••••••" value={password} onChange={(e)=>setPassword(e.target.value)} className="w-full px-4 py-2.5 bg-transparent text-xs font-mono text-zinc-800 dark:text-zinc-200 focus:outline-none placeholder:text-zinc-400/20"" autoComplete="off" spellCheck="false" autoCapitalize="none" autoCorrect="off" />
+<input type="password" placeholder="••••••••" value={password} onChange={(e)=>setPassword(e.target.value)} className="w-full px-4 py-2.5 bg-transparent text-xs font-mono text-zinc-800 dark:text-zinc-200 focus:outline-none placeholder:text-zinc-400/20" autoComplete="off" spellCheck="false" autoCapitalize="none" autoCorrect="off" />
 </div>
 </div>
 <div className="md:col-span-2 mt-2">
