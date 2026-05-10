@@ -7,7 +7,6 @@ appIsrStatus: false,
 allowedDevOrigins: ['10.119.131.76'],
 env: {
 // Auth Settings
-NEXTAUTH_URL: "http://0.0.0.0:8080", // Site base URL
 NEXTAUTH_SECRET: "Kagenonchalant-Zqwis-Apis", // Secret for session encryption
 OWNER_USER: "kage", // Master username
 OWNER_PASS: "123", // Master password
