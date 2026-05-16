@@ -1,6 +1,36 @@
 "use client";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+
+// ── Fetch Stats Hook ───────────────────────────────────────────────
+function useStats() {
+  const [stats, setStats] = useState({
+    requests: 0,
+    users: 0,
+    apis: 5,
+    uptime: "99.9%"
+  });
+
+  useEffect(() => {
+    // Fetch ke endpoint /api/stats
+    fetch('/api/stats')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.status && data?.data) {
+          // Sesuaikan key ini dengan response asli API stats kamu ya brok!
+          setStats({
+            requests: data.data.total_requests || data.data.requests || 0,
+            users: data.data.total_users || data.data.users || 0,
+            apis: data.data.total_apis || data.data.apis || 5,
+            uptime: data.data.uptime || "99.9%"
+          });
+        }
+      })
+      .catch(() => console.error("Failed to fetch stats"));
+  }, []);
+
+  return stats;
+}
 
 // ── Dark mode hook ─────────────────────────────────────────────────
 function useDarkMode() {
@@ -64,99 +94,56 @@ function OrbitRing() {
   );
 }
 
-// ── API Flow animation ─────────────────────────────────────────────
-const METHOD_BADGE: Record<string, string> = {
-  GET:    "text-blue-500   bg-blue-500/10   border-blue-500/25",
-  POST:   "text-emerald-500 bg-emerald-500/10 border-emerald-500/25",
-  PUT:    "text-amber-500  bg-amber-500/10  border-amber-500/25",
-  DELETE: "text-rose-500   bg-rose-500/10   border-rose-500/25",
-};
-const STATUS_COLOR: Record<string, string> = {
-  "200": "text-emerald-400", "201": "text-emerald-400",
-  "401": "text-rose-400",   "403": "text-rose-400",
-  "429": "text-amber-400",  "500": "text-rose-500",
-};
-
-type FlowLine =
-  | { type: "req"; method: string; path: string }
-  | { type: "res"; status: string; body: string };
-
-const FLOW: FlowLine[] = [
-  { type: "req", method: "GET",  path: "/api/v1/ai/text2img@freegen" },
-  { type: "res", status: "200",  body: '{ "status": true, "data": { "buffer": "..." } }' },
-  { type: "req", method: "POST", path: "/api/v1/ai/chat@HiWaifu" },
-  { type: "res", status: "200",  body: '{ "status": true, "reply": "Hello!" }' },
-  { type: "req", method: "GET",  path: "/api/v1/ai/search@HiWaifu?keyword=elaina" },
-  { type: "res", status: "200",  body: '{ "status": true, "results": [...] }' },
-  { type: "req", method: "POST", path: "/api/v1/tools/removebg@magicstudio" },
-  { type: "res", status: "200",  body: '{ "status": true, "data": { ... } }' },
-  { type: "req", method: "GET",  path: "/api/v1/list" },
-  { type: "res", status: "401",  body: '"Invalid API Key."' },
-];
-
-function ApiFlow() {
-  const [visible, setVisible] = useState(0);
-  const [cursor, setCursor] = useState(true);
-  const ref = useRef<HTMLDivElement>(null);
+// ── Live Traffic Visualizer ────────────────────────────────────────
+function LiveTrafficGraph() {
+  const [bars, setBars] = useState<number[]>(Array(24).fill(10));
 
   useEffect(() => {
-    if (visible < FLOW.length) {
-      const t = setTimeout(() => setVisible(v => v + 1), 480);
-      return () => clearTimeout(t);
-    }
-    const t = setTimeout(() => setVisible(0), 2600);
-    return () => clearTimeout(t);
-  }, [visible]);
-
-  useEffect(() => {
-    const t = setInterval(() => setCursor(c => !c), 520);
-    return () => clearInterval(t);
+    // Simulasi traffic data real-time (update setiap 600ms)
+    const interval = setInterval(() => {
+      setBars(prev => prev.map(() => 15 + Math.random() * 85));
+    }, 600);
+    return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (ref.current) ref.current.scrollTop = ref.current.scrollHeight;
-  }, [visible]);
-
   return (
-    <div className="w-full rounded-xl border border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950/80 overflow-hidden shadow-inner font-mono text-[11px]">
-      {/* Mac bar */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-black/5 dark:border-white/5 bg-white/60 dark:bg-zinc-900/60">
-        <span className="w-3 h-3 rounded-full bg-rose-400" />
-        <span className="w-3 h-3 rounded-full bg-amber-400" />
-        <span className="w-3 h-3 rounded-full bg-emerald-400" />
-        <span className="ml-3 text-[9px] font-bold tracking-widest text-zinc-400 uppercase">zqwis-api · live traffic</span>
-        <span className="ml-auto flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[9px] text-emerald-500 font-bold tracking-widest">ONLINE</span>
+    <div className="w-full rounded-xl border border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950/80 overflow-hidden shadow-inner flex flex-col">
+      {/* Header Bar */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-black/5 dark:border-white/5 bg-white/60 dark:bg-zinc-900/60">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          </span>
+          <span className="text-[9px] font-bold tracking-widest text-zinc-500 dark:text-zinc-400 uppercase">
+            NETWORK TRAFFIC
+          </span>
+        </div>
+        <span className="text-[9px] font-mono font-bold text-blue-500 dark:text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">
+          LIVE
         </span>
       </div>
 
-      {/* Lines */}
-      <div ref={ref} className="p-4 space-y-1.5 min-h-[168px] max-h-[168px] overflow-hidden">
-        {FLOW.slice(0, visible).map((line, i) => {
-          if (line.type === "req") {
-            const badge = METHOD_BADGE[line.method] ?? "text-zinc-400 bg-zinc-500/10 border-zinc-500/20";
-            return (
-              <div key={i} className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-150">
-                <span className={`shrink-0 text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded border ${badge}`}>
-                  {line.method}
-                </span>
-                <span className="text-zinc-600 dark:text-zinc-400 truncate">{line.path}</span>
-              </div>
-            );
-          }
-          const sc = STATUS_COLOR[line.status] ?? "text-zinc-400";
-          return (
-            <div key={i} className="flex items-start gap-2 pl-0.5 animate-in fade-in slide-in-from-right-2 duration-150">
-              <span className={`shrink-0 font-black text-[10px] tracking-widest ${sc}`}>← {line.status}</span>
-              <span className="text-zinc-400 dark:text-zinc-600 truncate text-[10px]">{line.body}</span>
-            </div>
-          );
-        })}
-        {/* Cursor line */}
-        <div className="flex items-center gap-2 pt-0.5">
-          <span className="text-zinc-300 dark:text-zinc-700 text-[10px] font-black">▸</span>
-          <span className={`w-2 h-3.5 bg-blue-500 rounded-sm transition-opacity duration-75 ${cursor ? "opacity-100" : "opacity-0"}`} />
+      {/* Graph Area */}
+      <div className="relative h-[120px] w-full p-4 flex items-end justify-between gap-1">
+        {/* Glow Background */}
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-500/5 dark:from-blue-500/10 to-transparent pointer-events-none" />
+        
+        {/* Animated Bars */}
+        {bars.map((height, i) => (
+          <div key={i} className="relative w-full flex justify-center group h-full items-end">
+            <div 
+              style={{ height: `${height}%` }}
+              className="w-full max-w-[8px] bg-gradient-to-t from-blue-600 to-cyan-400 dark:from-blue-500 dark:to-cyan-300 rounded-t-sm transition-all duration-[600ms] ease-out opacity-80 group-hover:opacity-100"
+            />
+          </div>
+        ))}
+
+        {/* Grid lines overlay */}
+        <div className="absolute inset-0 pointer-events-none flex flex-col justify-between py-4 opacity-20 dark:opacity-30">
+          <div className="w-full h-px border-t border-dashed border-zinc-400 dark:border-zinc-500" />
+          <div className="w-full h-px border-t border-dashed border-zinc-400 dark:border-zinc-500" />
+          <div className="w-full h-px border-t border-dashed border-zinc-400 dark:border-zinc-500" />
         </div>
       </div>
     </div>
@@ -181,19 +168,15 @@ function ThemeToggle({ isDark, toggle }: { isDark: boolean; toggle: () => void }
       aria-label="Toggle dark mode"
       className="relative w-14 h-7 rounded-full border border-black/[0.08] dark:border-white/[0.08] bg-white/90 dark:bg-zinc-900/90 shadow-sm transition-all duration-300 active:scale-95 overflow-hidden backdrop-blur-sm"
     >
-      {/* Icon track */}
       <div className="absolute inset-0 flex items-center justify-between px-[7px] pointer-events-none">
-        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          className="text-zinc-200 dark:text-zinc-700 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-200 dark:text-zinc-700 transition-colors">
           <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
         </svg>
-        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          className="text-zinc-200 dark:text-zinc-700 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-200 dark:text-zinc-700 transition-colors">
           <circle cx="12" cy="12" r="4"/>
           <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
         </svg>
       </div>
-      {/* Thumb */}
       <div className={`
         absolute top-[3px] w-[22px] h-[22px] rounded-full
         bg-white dark:bg-zinc-800 shadow
@@ -223,23 +206,12 @@ function Particle({ style }: { style: React.CSSProperties }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Real API data — pulled from myapis.ts registry
-// ═══════════════════════════════════════════════════════════════════
-const REAL_APIS = [
-  { name: "Text2Img (Freegen)",      category: "Ai",    method: "GET"  },
-  { name: "Text2Img (MagicStudio)",  category: "Ai",    method: "GET"  },
-  { name: "Search Character",        category: "Ai",    method: "GET"  },
-  { name: "Chat Character",          category: "Ai",    method: "POST" },
-  { name: "Remove BG (MagicStudio)", category: "Tools", method: "POST" },
-];
-const CATEGORIES = [...new Set(REAL_APIS.map(a => a.category))];
-
-// ═══════════════════════════════════════════════════════════════════
 // PAGE
 // ═══════════════════════════════════════════════════════════════════
 export default function WelcomePage() {
   const router = useRouter();
   const { isDark, toggle, mounted } = useDarkMode();
+  const apiStats = useStats(); // Panggil data asli dari backend
 
   if (!mounted) return null;
 
@@ -320,22 +292,22 @@ export default function WelcomePage() {
           </div>
         </div>
 
-        {/* API Flow (replaces terminal) */}
-        <ApiFlow />
+        {/* Live Traffic Visualizer (Menggantikan Terminal) */}
+        <LiveTrafficGraph />
 
-        {/* Real stats — no dummy numbers */}
+        {/* Real stats fetched from /api/stats */}
         <div className="w-full grid grid-cols-3 gap-3">
-          <div className="flex flex-col items-center gap-0.5 px-5 py-3 rounded-xl border border-black/5 dark:border-white/5 bg-card">
-            <span className="text-lg font-black font-mono text-blue-500">{REAL_APIS.length}</span>
-            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase">APIs</span>
+          <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-blue-500/30 transition-colors">
+            <span className="text-xl font-black font-mono text-blue-500">{apiStats.requests.toLocaleString()}</span>
+            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Total Req</span>
           </div>
-          <div className="flex flex-col items-center gap-0.5 px-5 py-3 rounded-xl border border-black/5 dark:border-white/5 bg-card">
-            <span className="text-lg font-black font-mono text-emerald-500">{CATEGORIES.length}</span>
-            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase">Categories</span>
+          <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-emerald-500/30 transition-colors">
+            <span className="text-xl font-black font-mono text-emerald-500">{apiStats.users.toLocaleString()}</span>
+            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Users</span>
           </div>
-          <div className="flex flex-col items-center gap-0.5 px-5 py-3 rounded-xl border border-black/5 dark:border-white/5 bg-card">
-            <span className="text-lg font-black font-mono text-cyan-500">99.9%</span>
-            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase">Uptime</span>
+          <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-cyan-500/30 transition-colors">
+            <span className="text-xl font-black font-mono text-cyan-500">{apiStats.uptime}</span>
+            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Uptime</span>
           </div>
         </div>
 
