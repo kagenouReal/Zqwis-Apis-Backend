@@ -13,7 +13,7 @@ let maxIter = 0;
 
 while (results.length < limit && maxIter < 5) {
 maxIter++;
-const payload = {
+const payload: any = {
 options: {
 query: query,
 scope: "pins",
