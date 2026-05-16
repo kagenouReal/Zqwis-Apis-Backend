@@ -5,28 +5,50 @@ import { useRouter } from "next/navigation";
 // ── Fetch Stats Hook ───────────────────────────────────────────────
 function useStats() {
   const [stats, setStats] = useState({
-    requests: 0,
-    users: 0,
-    apis: 5,
-    uptime: "99.9%"
+    total: 0,
+    success: 0,
+    failed: 0,
+    apis: 0,
+    categories: 0,
+    lastCrash: "SECURE"
   });
 
   useEffect(() => {
-    // Fetch ke endpoint /api/stats
+    // 1. Fetch Traffic Stats
     fetch('/api/stats')
       .then(res => res.json())
       .then(data => {
-        if (data?.status && data?.data) {
-          // Sesuaikan key ini dengan response asli API stats kamu ya brok!
-          setStats({
-            requests: data.data.total_requests || data.data.requests || 0,
-            users: data.data.total_users || data.data.users || 0,
-            apis: data.data.total_apis || data.data.apis || 5,
-            uptime: data.data.uptime || "99.9%"
-          });
+        let crashText = "SECURE";
+        if (data.lastCrash) {
+          const date = new Date(data.lastCrash);
+          // Format jam menit (contoh: "14:30")
+          crashText = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        setStats(prev => ({
+          ...prev,
+          total: data.total || 0,
+          success: data.success || 0,
+          failed: data.failed || 0,
+          lastCrash: crashText
+        }));
+      })
+      .catch(() => console.error("Failed to fetch traffic stats"));
+
+    // 2. Fetch API Registry untuk Total API & Kategori
+    fetch('/api/v1/list')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const uniqueCategories = new Set(data.map((item: any) => item.category)).size;
+          setStats(prev => ({
+            ...prev,
+            apis: data.length,
+            categories: uniqueCategories
+          }));
         }
       })
-      .catch(() => console.error("Failed to fetch stats"));
+      .catch(() => console.error("Failed to fetch API list"));
   }, []);
 
   return stats;
@@ -99,7 +121,6 @@ function LiveTrafficGraph() {
   const [bars, setBars] = useState<number[]>(Array(24).fill(10));
 
   useEffect(() => {
-    // Simulasi traffic data real-time (update setiap 600ms)
     const interval = setInterval(() => {
       setBars(prev => prev.map(() => 15 + Math.random() * 85));
     }, 600);
@@ -108,7 +129,6 @@ function LiveTrafficGraph() {
 
   return (
     <div className="w-full rounded-xl border border-black/5 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950/80 overflow-hidden shadow-inner flex flex-col">
-      {/* Header Bar */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-black/5 dark:border-white/5 bg-white/60 dark:bg-zinc-900/60">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
@@ -123,13 +143,8 @@ function LiveTrafficGraph() {
           LIVE
         </span>
       </div>
-
-      {/* Graph Area */}
       <div className="relative h-[120px] w-full p-4 flex items-end justify-between gap-1">
-        {/* Glow Background */}
         <div className="absolute inset-0 bg-gradient-to-t from-blue-500/5 dark:from-blue-500/10 to-transparent pointer-events-none" />
-        
-        {/* Animated Bars */}
         {bars.map((height, i) => (
           <div key={i} className="relative w-full flex justify-center group h-full items-end">
             <div 
@@ -138,8 +153,6 @@ function LiveTrafficGraph() {
             />
           </div>
         ))}
-
-        {/* Grid lines overlay */}
         <div className="absolute inset-0 pointer-events-none flex flex-col justify-between py-4 opacity-20 dark:opacity-30">
           <div className="w-full h-px border-t border-dashed border-zinc-400 dark:border-zinc-500" />
           <div className="w-full h-px border-t border-dashed border-zinc-400 dark:border-zinc-500" />
@@ -211,7 +224,7 @@ function Particle({ style }: { style: React.CSSProperties }) {
 export default function WelcomePage() {
   const router = useRouter();
   const { isDark, toggle, mounted } = useDarkMode();
-  const apiStats = useStats(); // Panggil data asli dari backend
+  const apiStats = useStats();
 
   if (!mounted) return null;
 
@@ -292,22 +305,36 @@ export default function WelcomePage() {
           </div>
         </div>
 
-        {/* Live Traffic Visualizer (Menggantikan Terminal) */}
         <LiveTrafficGraph />
 
-        {/* Real stats fetched from /api/stats */}
+        {/* Real stats: 6 Grid Layout */}
         <div className="w-full grid grid-cols-3 gap-3">
+          {/* Row 1 */}
           <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-blue-500/30 transition-colors">
-            <span className="text-xl font-black font-mono text-blue-500">{apiStats.requests.toLocaleString()}</span>
+            <span className="text-xl font-black font-mono text-blue-500">{apiStats.total.toLocaleString()}</span>
             <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Total Req</span>
           </div>
           <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-emerald-500/30 transition-colors">
-            <span className="text-xl font-black font-mono text-emerald-500">{apiStats.users.toLocaleString()}</span>
-            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Users</span>
+            <span className="text-xl font-black font-mono text-emerald-500">{apiStats.success.toLocaleString()}</span>
+            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Success</span>
           </div>
-          <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-cyan-500/30 transition-colors">
-            <span className="text-xl font-black font-mono text-cyan-500">{apiStats.uptime}</span>
-            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Uptime</span>
+          <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-rose-500/30 transition-colors">
+            <span className="text-xl font-black font-mono text-rose-500">{apiStats.failed.toLocaleString()}</span>
+            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Failed</span>
+          </div>
+          
+          {/* Row 2 */}
+          <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-purple-500/30 transition-colors">
+            <span className="text-xl font-black font-mono text-purple-500">{apiStats.apis}</span>
+            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Total APIs</span>
+          </div>
+          <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-amber-500/30 transition-colors">
+            <span className="text-xl font-black font-mono text-amber-500">{apiStats.categories}</span>
+            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Categories</span>
+          </div>
+          <div className="flex flex-col items-center justify-center gap-0.5 px-3 py-3.5 rounded-xl border border-black/5 dark:border-white/5 bg-card hover:border-zinc-500/30 transition-colors">
+            <span className={`text-sm md:text-base font-black font-mono mt-1 ${apiStats.lastCrash === "SECURE" ? "text-emerald-500" : "text-rose-500"}`}>{apiStats.lastCrash}</span>
+            <span className="text-[9px] font-bold tracking-[0.15em] text-zinc-400 uppercase text-center mt-1">Last Crash</span>
           </div>
         </div>
 
