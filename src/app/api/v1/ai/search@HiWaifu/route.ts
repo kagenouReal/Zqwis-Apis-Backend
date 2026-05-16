@@ -4,6 +4,8 @@ import { addSuccess, addFail } from "@/system/lib/store";
 import { checkApikey } from "@/system/lib/apiguard";
 import { message } from "@/system/lib/message";
 
+export const dynamic = 'force-dynamic';
+
 async function searchHiWaifu(keyword: string) {
 try {
 const res = await axios.post('https://api.hiwaifu.com/client/common/robot/search', {
@@ -39,8 +41,12 @@ const results = res.data.data.data.map((bot: any) => ({
 id: bot.robots_id,
 name: bot.robot_name,
 avatar: bot.avatar || bot.robot_avatar || "",
-description: bot.intro || bot.description || "",
-...bot
+description: bot.scene || bot.description || bot.intro || "",
+greeting: bot.greeting || "",
+categories: bot.categories || "",
+chat_count: bot.chat_num || 0,
+upvotes: bot.upvote_count || 0,
+author: bot.username || "Unknown"
 }));
 return { status: true, data: results };
 }
