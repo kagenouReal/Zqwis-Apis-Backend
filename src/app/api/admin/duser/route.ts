@@ -17,7 +17,7 @@ return NextResponse.json({ status: false, message: message.input.missing }, { st
 }
 const rootOwner = process.env.OWNER_USER || "owner";
 if (username.toLowerCase() === rootOwner.toLowerCase()) {
-return NextResponse.json({ status: false, message: message.api.forbidden }, { status: 403 });
+return NextResponse.json({ status: false, message: message.auth.forbidden }, { status: 403 });
 }
 let users = await readDB();
 const targetUser = users.find((u: any) => u.username === username);
@@ -25,7 +25,7 @@ if (!targetUser) {
 return NextResponse.json({ status: false, message: message.user.notFound }, { status: 404 });
 }
 if (requesterRole === "admin" && targetUser.role === "owner") {
-return NextResponse.json({ status: false, message: message.api.forbidden }, { status: 403 });
+return NextResponse.json({ status: false, message: message.auth.forbidden }, { status: 403 });
 }
 users = users.filter((u: any) => u.username !== username);
 await writeDB(users);
