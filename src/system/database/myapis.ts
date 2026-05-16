@@ -33,7 +33,7 @@ curl: `curl -X POST "<DOMAIN>/api/v1/tools/removebg?apikey=<apikey>" -F "image=@
 },
 {
 name: "Search Character (HiWaifu)",
-category: "Ai",
+category: "search",
 method: "GET",
 path: "/api/v1/ai/search@hiwaifu",
 desc: "Search HiWaifu characters by keyword",
@@ -53,7 +53,7 @@ curl: `curl -X POST "<DOMAIN>/search/v1/ai/chat@hiwaifu?apikey=<apikey>" -H "Con
 },
 {
 name: "Search Items (Mudah.my)",
-category: "Tools",
+category: "search",
 method: "GET",
 path: "/api/v1/tools/search@mudah",
 desc: "Search items on Mudah.my by keyword",
@@ -74,7 +74,7 @@ curl: `curl -X GET "<DOMAIN>/api/v1/tools/track@trackingmy?resi=JTE123456789&api
 },
 {
 name: "OTP Spammer (Tracking.my)",
-category: "Shadow Tools",
+category: "experimental",
 method: "POST",
 path: "/api/v1/experimental/otp@trackingmy",
 desc: "Send OTP Whatsapp login request to target phone number (3s Cooldown)",
@@ -145,5 +145,4 @@ query: ["title"],
 example: "/api/v1/search/search@komikindo?title=one+piece",
 curl: `curl -X GET "<DOMAIN>/api/v1/search/komikindo?title=one+piece&apikey=<apikey>" -H "Accept: application/json"`
 }
-
 ];

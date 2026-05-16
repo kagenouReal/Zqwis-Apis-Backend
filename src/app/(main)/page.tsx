@@ -44,7 +44,6 @@ categories: uniqueCategories
 })
 .catch(() => console.error("Failed to fetch API list"));
 }, []);
-
 return stats;
 }
 function useDarkMode() {
