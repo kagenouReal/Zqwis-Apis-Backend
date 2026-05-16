@@ -1,7 +1,9 @@
+import { NextResponse } from "next/server";
 import axios from "axios";
 import FormData from "form-data";
 import { addSuccess, addFail } from "@/system/lib/store";
 import { checkApikey } from "@/system/lib/apiguard";
+import { message } from "@/system/lib/message";
 
 async function aiIMGGenerator(prompt: string) {
 try {
@@ -31,16 +33,17 @@ const { searchParams } = new URL(req.url);
 const prompt = searchParams.get("prompt");
 if (!prompt) {
 addFail();
-return Response.json({ status: false }, { status: 400 });
+return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
 }
 const result = await aiIMGGenerator(prompt);
 if (!result.status || !result.buffer) {
 addFail();
-return Response.json({ status: false }, { status: 500 });
+return NextResponse.json({ status: false, message: message.scrape.fetchFailed }, { status: 500 });
 }
 addSuccess();
-return Response.json({
+return NextResponse.json({
 status: true,
+message: message.status.success,
 creator: "@Zqwis-Apis",
 limit_left: auth.user?.role === "user" ? auth.user.limit : "UNLIMITED",
 data: {
@@ -50,6 +53,6 @@ buffer: result.buffer.toString("base64")
 }, { status: 200 });
 } catch (err) {
 addFail();
-return Response.json({ status: false }, { status: 500 });
+return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
 }
 }

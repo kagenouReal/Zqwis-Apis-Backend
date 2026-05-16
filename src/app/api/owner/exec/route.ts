@@ -15,16 +15,16 @@ try {
 const body = await req.json();
 const { command } = body;
 if (!command) {
-return NextResponse.json({ status: false, message: "Command is required." }, { status: 400 });
+return NextResponse.json({ status: false, message: message.exec.missing }, { status: 400 });
 }
 try {
 const { stdout, stderr } = await execPromise(command);
-const output = stdout || stderr || "Executed successfully (no output).";
+const output = stdout || stderr || message.exec.success;
 return NextResponse.json({ status: true, output });
 } catch (execError: any) {
 return NextResponse.json({ 
 status: false, 
-output: execError.stderr || execError.message || "Execution failed." 
+output: execError.stderr || execError.message || message.exec.failed 
 }, { status: 500 });
 }
 } catch (err) {

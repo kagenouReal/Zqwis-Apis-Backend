@@ -3,6 +3,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { readDB } from "@/system/lib/db"; 
 import { NextRequest } from "next/server";
+
 export const authOptions: NextAuthOptions = {
 providers: [
 CredentialsProvider({
@@ -75,7 +76,9 @@ strategy: "jwt",
 },
 secret: process.env.NEXTAUTH_SECRET,
 };
+
 const authHandler = NextAuth(authOptions);
+
 const handler = async (req: NextRequest, ctx: any) => {
 const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
 const protocol = req.headers.get("x-forwarded-proto") || (host?.includes("localhost") || host?.includes("0.0.0.0") ? "http" : "https");
@@ -84,4 +87,5 @@ process.env.NEXTAUTH_URL = `${protocol}://${host}`;
 }
 return authHandler(req, ctx);
 };
+
 export { handler as GET, handler as POST };

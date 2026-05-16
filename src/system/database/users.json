@@ -35,5 +35,16 @@
     "whitelistIp": [],
     "lastReset": 1778759491272,
     "createdAt": "2026-05-14T11:51:31.272Z"
+  },
+  {
+    "username": "kontoll",
+    "password": "555555",
+    "role": "user",
+    "apikey": "Zqwis_975b0300d6bd",
+    "limit": 10,
+    "maxIpQuota": 3,
+    "whitelistIp": [],
+    "lastReset": 1778864914832,
+    "createdAt": "2026-05-15T17:08:34.832Z"
   }
 ]

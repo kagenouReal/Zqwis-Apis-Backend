@@ -10,7 +10,6 @@ example:
 "/api/v1/ai/text2img@freegen?prompt=anime+girl+in+beach",
 curl: `curl -X GET "<DOMAIN>/api/v1/ai/text2img@freegen?prompt=anime+girl+in+beach&apikey=<apikey>" -H "Accept: application/json"`
 },
-
 {
 name: "Text2Img (MagicStudio)",
 category: "Ai",
@@ -22,15 +21,34 @@ example:
 "/api/v1/ai/text2img@magicstudio?prompt=anime+girl+in+city",
 curl: `curl -X GET "<DOMAIN>/api/v1/ai/text2img@magicstudio?prompt=anime+girl+in+city&apikey=<apikey>" -H "Accept: application/json"`
 },
-
 {
 name: "Remove BG (MagicStudio)",
 category: "Tools",
 method: "POST",
-path: "/api/v1/tools/removebg",
+path: "/api/v1/tools/removebg@magicstudio",
 desc: "Remove background from Image (URL or Upload File)",
-body: ["image"],
-example: "/api/v1/tools/removebg",
+body: ["url"],
+example: "/api/v1/tools/removebg@magicstudio",
 curl: `curl -X POST "<DOMAIN>/api/v1/tools/removebg?apikey=<apikey>" -F "image=@/path/to/your/image.jpg"`
+},
+{
+name: "Search Character (HiWaifu)",
+category: "Ai",
+method: "GET",
+path: "/api/v1/ai/search@hiwaifu",
+desc: "Search HiWaifu characters by keyword",
+query: ["keyword"],
+example: "/api/v1/ai/search@hiwaifu?keyword=elaina",
+curl: `curl -X GET "<DOMAIN>/api/v1/ai/search@hiwaifu?keyword=elaina&apikey=<apikey>" -H "Accept: application/json"`
+},
+{
+name: "Chat Character (HiWaifu)",
+category: "Ai",
+method: "POST",
+path: "/api/v1/ai/chat@hiwaifu",
+desc: "Chat with HiWaifu character using automated WebSocket integration",
+body: ["robotId", "prompt"],
+example: "/api/v1/ai/chat@hiwaifu",
+curl: `curl -X POST "<DOMAIN>/api/v1/ai/chat@hiwaifu?apikey=<apikey>" -H "Content-Type: application/json" -d '{"robotId": "18029866", "prompt": "Halo"}'`
 }
 ];

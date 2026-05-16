@@ -3,6 +3,7 @@ import axios from "axios";
 import FormData from "form-data";
 import { addSuccess, addFail } from "@/system/lib/store";
 import { checkApikey } from "@/system/lib/apiguard";
+import { message } from "@/system/lib/message";
 
 async function removeBg(buffer: Buffer) {
 const base64 = buffer.toString("base64");
@@ -33,7 +34,7 @@ const formData = await req.formData();
 const file = formData.get("image") as File;
 if (!file) {
 addFail();
-return NextResponse.json({ status: false, message: "No image file provided in form-data 'image'" }, { status: 400 });
+return NextResponse.json({ status: false, message: message.file.missing }, { status: 400 });
 }
 const arrayBuffer = await file.arrayBuffer();
 buffer = Buffer.from(arrayBuffer);
@@ -44,37 +45,37 @@ if (body.url) {
 const imgRes = await fetch(body.url);
 if (!imgRes.ok) {
 addFail();
-return NextResponse.json({ status: false, message: "Failed to fetch image from URL." }, { status: 400 });
+return NextResponse.json({ status: false, message: message.api.fetchFailed }, { status: 400 });
 }
 buffer = Buffer.from(await imgRes.arrayBuffer());
 } else if (body.base64) {
 buffer = Buffer.from(body.base64, "base64");
 } else {
 addFail();
-return NextResponse.json({ status: false, message: "Provide 'url', 'base64', or send via multipart/form-data" }, { status: 400 });
+return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
 }
 } else {
 addFail();
-return NextResponse.json({ status: false, message: "Unsupported content-type. Use application/json or multipart/form-data" }, { status: 400 });
+return NextResponse.json({ status: false, message: message.input.invalidFormat }, { status: 400 });
 }
 if (!buffer) {
 addFail();
-return NextResponse.json({ status: false, message: "Failed to process image buffer" }, { status: 500 });
+return NextResponse.json({ status: false, message: message.file.invalid }, { status: 500 });
 }
 const result = await removeBg(buffer);
 addSuccess();
 return NextResponse.json({
 status: true,
+message: message.status.success,
 creator: "@Zqwis-Apis",
 limit_left: auth.user?.role === "user" ? auth.user.limit : "UNLIMITED",
 data: result
 }, { status: 200 });
 } catch (err: any) {
 addFail();
-console.error("REMOVE BG ERROR:", err?.response?.data || err.message);
 return NextResponse.json({ 
 status: false, 
-message: "Internal Server Error or MagicStudio API failed." 
+message: message.api.serverError 
 }, { status: 500 });
 }
 }

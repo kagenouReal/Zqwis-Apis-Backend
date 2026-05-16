@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
 const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 const role = token?.role as string;
 if (!token || token.isDead || (role !== "admin" && role !== "owner")) {
-return NextResponse.json({ status: false, message: message.auth.owner }, { status: 403 });
+return NextResponse.json({ status: false, message: message.auth.denied }, { status: 403 });
 }
 try {
 const users = await readDB();

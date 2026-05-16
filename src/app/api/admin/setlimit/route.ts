@@ -7,12 +7,12 @@ export async function POST(req: NextRequest) {
 const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 const requesterRole = token?.role as string;
 if (!token || token.isDead || (requesterRole !== "admin" && requesterRole !== "owner")) {
-return NextResponse.json({ status: false, message: message.auth.owner }, { status: 403 });
+return NextResponse.json({ status: false, message: message.auth.denied }, { status: 403 });
 }
 try {
 const { username, amount } = await req.json();
 if (!username || typeof amount !== "number") {
-return NextResponse.json({ status: false, message: "Username and valid amount number are required." }, { status: 400 });
+return NextResponse.json({ status: false, message: message.input.invalid }, { status: 400 });
 }
 let users = await readDB();
 const userIndex = users.findIndex((u: any) => u.username === username);
@@ -21,10 +21,7 @@ return NextResponse.json({ status: false, message: message.user.notFound }, { st
 }
 users[userIndex].limit = (users[userIndex].limit || 0) + amount;
 await writeDB(users);
-return NextResponse.json({ 
-status: true, 
-message: `Successfully added ${amount} limits to @${username}. New limit: ${users[userIndex].limit}` 
-});
+return NextResponse.json({ status: true, message: message.status.success });
 } catch (err) {
 return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
 }

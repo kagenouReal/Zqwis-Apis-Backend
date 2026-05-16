@@ -1,40 +1,136 @@
 export const message = {
 auth: {
-owner: "You’re not allowed.",
-loginRequired: "Please login first.",
+owner: "Owner access only.",
+admin: "Admin access only.",
+denied: "Access denied.",
+loginRequired: "Login required.",
+unauthorized: "Unauthorized.",
+invalidKey: "Invalid API key.",
+missingKey: "API key required.",
 invalidToken: "Invalid token.",
 sessionExpired: "Session expired.",
+forbidden: "Forbidden.",
 },
+
 status: {
-success: "Done.",
+success: "Success.",
+done: "Done.",
+created: "Created.",
+updated: "Updated.",
+deleted: "Deleted.",
+processing: "Processing.",
+pending: "Pending.",
+failed: "Failed.",
 error: "Something went wrong.",
-pending: "Processing...",
-wait: "Hold on...",
 },
+
 api: {
 notFound: "Endpoint not found.",
-forbidden: "Access denied.",
+disabled: "API disabled.",
+maintenance: "API under maintenance.",
 rateLimit: "Too many requests.",
 serverError: "Internal server error.",
+timeout: "Request timeout.",
+invalidResponse: "Invalid response.",
+fetchFailed: "Failed to fetch data.",
+unavailable: "Service unavailable.",
 },
+
 input: {
-wrong: "Invalid input.",
 missing: "Required field missing.",
-tooShort: "Too short.",
-tooLong: "Too long.",
+invalid: "Invalid input.",
+wrong: "Wrong input.",
+empty: "Input cannot be empty.",
+tooShort: "Input too short.",
+tooLong: "Input too long.",
+invalidFormat: "Invalid format.",
+alreadyExists: "Already exists.",
 },
-system: {
-offline: "System offline.",
-maintenance: "Under maintenance.",
-busy: "Server is busy.",
-},
+
 user: {
 notFound: "User not found.",
-unauthorized: "Unauthorized access.",
+exists: "User already exists.",
+created: "User created.",
+deleted: "User deleted.",
+updated: "User updated.",
+passwordChanged: "Password updated.",
+usernameChanged: "Username updated.",
+invalidPassword: "Wrong password.",
+locked: "User locked.",
+banned: "User banned.",
 },
+
+apikey: {
+generated: "API key generated.",
+reset: "API key reset.",
+exhausted: "Limit exhausted.",
+invalid: "Invalid API key.",
+required: "API key required.",
+},
+
+ip: {
+missing: "IP required.",
+invalid: "Invalid IP.",
+added: "IP added.",
+removed: "IP removed.",
+exists: "IP already exists.",
+notFound: "IP not found.",
+whitelistRequired: "No IP whitelisted.",
+notWhitelisted: "IP not whitelisted.",
+quotaFull: "IP quota reached.",
+},
+
+limit: {
+updated: "Limit updated.",
+exceeded: "Limit exceeded.",
+exhausted: "No limit left.",
+reset: "Limit reset.",
+invalidAmount: "Invalid limit amount.",
+},
+
+db: {
+readFail: "Database read failed.",
+writeFail: "Database write failed.",
+corrupted: "Database corrupted.",
+notReady: "Database not ready.",
+},
+
+system: {
+online: "System online.",
+offline: "System offline.",
+busy: "Server busy.",
+locked: "System locked.",
+rebooting: "System rebooting.",
+maintenance: "System maintenance.",
+defense: "System defense active.",
+},
+
 scrape: {
-emptyResult: "No data found.",
-fetchFailed: "Failed to fetch data.",
-invalidResponse: "Invalid response from server.",
+noResult: "No result found.",
+fetchFailed: "Fetch failed.",
+invalidResponse: "Invalid source response.",
+blocked: "Source blocked request.",
 },
+
+file: {
+missing: "File required.",
+invalid: "Invalid file.",
+tooLarge: "File too large.",
+uploaded: "Upload success.",
+deleted: "File deleted.",
+unsupported: "Unsupported file type.",
+},
+
+exec: {
+missing: "Command required.",
+success: "Command executed.",
+failed: "Command failed.",
+blocked: "Command blocked.",
+},
+
+profile: {
+loaded: "Profile loaded.",
+updated: "Profile updated.",
+locked: "Profile locked.",
+}
 };
