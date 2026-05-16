@@ -35,20 +35,20 @@ curl: `curl -X POST "<DOMAIN>/api/v1/tools/removebg?apikey=<apikey>" -F "image=@
 name: "Search Character (HiWaifu)",
 category: "Ai",
 method: "GET",
-path: "/api/v1/ai/search@hiwaifu",
+path: "/api/v1/ai/search@HiWaifu",
 desc: "Search HiWaifu characters by keyword",
 query: ["keyword"],
-example: "/api/v1/ai/search@hiwaifu?keyword=elaina",
-curl: `curl -X GET "<DOMAIN>/api/v1/ai/search@hiwaifu?keyword=elaina&apikey=<apikey>" -H "Accept: application/json"`
+example: "/api/v1/ai/search@HiWaifu?keyword=elaina",
+curl: `curl -X GET "<DOMAIN>/api/v1/ai/search@HiWaifu?keyword=elaina&apikey=<apikey>" -H "Accept: application/json"`
 },
 {
 name: "Chat Character (HiWaifu)",
 category: "Ai",
 method: "POST",
-path: "/api/v1/ai/chat@hiwaifu",
+path: "/api/v1/ai/chat@HiWaifu",
 desc: "Chat with HiWaifu character using automated WebSocket integration",
 body: ["robotId", "prompt"],
-example: "/api/v1/ai/chat@hiwaifu",
-curl: `curl -X POST "<DOMAIN>/api/v1/ai/chat@hiwaifu?apikey=<apikey>" -H "Content-Type: application/json" -d '{"robotId": "18029866", "prompt": "Halo"}'`
+example: "/api/v1/ai/chat@HiWaifu",
+curl: `curl -X POST "<DOMAIN>/api/v1/ai/chat@HiWaifu?apikey=<apikey>" -H "Content-Type: application/json" -d '{"robotId": "18029866", "prompt": "Halo"}'`
 }
 ];
