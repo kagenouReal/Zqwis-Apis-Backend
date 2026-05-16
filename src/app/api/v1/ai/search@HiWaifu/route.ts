@@ -1,14 +1,11 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import axios from "axios";
+import { addSuccess, addFail } from "@/system/lib/store";
+import { checkApikey } from "@/system/lib/apiguard";
 import { message } from "@/system/lib/message";
 
-export async function GET(req: NextRequest) {
+async function searchHiWaifu(keyword: string) {
 try {
-const { searchParams } = new URL(req.url);
-const keyword = searchParams.get("keyword");
-if (!keyword) {
-return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
-}
 const res = await axios.post('https://api.hiwaifu.com/client/common/robot/search', {
 "page": 1,
 "keyword": keyword,
@@ -40,12 +37,44 @@ headers: {
 if (res.data.status === 200) {
 const results = res.data.data.data.map((bot: any) => ({
 id: bot.robots_id,
-name: bot.robot_name
+name: bot.robot_name,
+avatar: bot.avatar || bot.robot_avatar || "",
+description: bot.intro || bot.description || "",
+...bot
 }));
-return NextResponse.json({ status: true, message: message.status.success, data: results });
+return { status: true, data: results };
 }
-return NextResponse.json({ status: false, message: message.scrape.noResult }, { status: 404 });
+return { status: false };
 } catch (err) {
+return { status: false };
+}
+}
+
+export async function GET(req: Request) {
+const auth = await checkApikey(req);
+if (!auth.status) return auth.response;
+try {
+const { searchParams } = new URL(req.url);
+const keyword = searchParams.get("keyword");
+if (!keyword) {
+addFail();
+return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
+}
+const result = await searchHiWaifu(keyword);
+if (!result || !result.status || !result.data) {
+addFail();
+return NextResponse.json({ status: false, message: message.scrape.noResult }, { status: 404 });
+}
+addSuccess();
+return NextResponse.json({
+status: true,
+message: message.status.success,
+creator: "@Zqwis-Apis",
+limit_left: auth.user?.role === "user" ? auth.user.limit : "UNLIMITED",
+data: result.data
+}, { status: 200 });
+} catch (err) {
+addFail();
 return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
 }
 }

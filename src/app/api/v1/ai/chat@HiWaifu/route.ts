@@ -1,19 +1,15 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import axios from "axios";
 import WebSocket from "ws";
+import { addSuccess, addFail } from "@/system/lib/store";
+import { checkApikey } from "@/system/lib/apiguard";
 import { message } from "@/system/lib/message";
 
-export async function POST(req: NextRequest) {
-try {
-const body = await req.json();
-const { robotId, prompt } = body;
-if (!robotId || !prompt) {
-return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
-}
-const reply = await new Promise(async (resolve) => {
+async function chatHiWaifu(robotId: string | number, prompt: string) {
+return await new Promise(async (resolve) => {
 try {
 const createRes = await axios.post('https://api.hiwaifu.com/client/session/single', {
-"robot_id": parseInt(robotId, 10),
+"robot_id": parseInt(robotId as string, 10),
 "sign": "771d08a89e4d674f25da0358b1d2ee34"
 }, {
 headers: {
@@ -42,7 +38,7 @@ headers: {
 }
 });
 if (createRes.data.status !== 200) {
-return resolve({ status: false, message: message.scrape.fetchFailed });
+return resolve({ status: false });
 }
 const chatId = createRes.data.data.chat_id;
 const sessionId = createRes.data.data.session_id;
@@ -51,9 +47,9 @@ let activeSocketId = "";
 const ws = new WebSocket('wss://wss.hiwaifu.com/app/workbunny', { headers: { 'User-Agent': 'Dart/3.10 (dart:io)' } });
 const timeout = setTimeout(() => {
 ws.close();
-resolve({ status: false, message: message.api.timeout });
+resolve({ status: false });
 }, 60000);
-ws.on('message', async (data) => {
+ws.on('message', async (data: any) => {
 const msg = JSON.parse(data.toString());
 if (msg.event === 'pusher:connection_established') {
 activeSocketId = typeof msg.data === 'string' ? JSON.parse(msg.data).socket_id : msg.data.socket_id;
@@ -65,10 +61,10 @@ socket_id: activeSocketId
 headers: { 'user-agent': 'Dart/3.10 (dart:io)', 'content-type': 'application/json; charset=UTF-8' }
 });
 ws.send(JSON.stringify({ event: 'pusher:subscribe', data: { channel: channelName, auth: authRes.data.auth } }));
-} catch (err: any) {
+} catch (err) {
 clearTimeout(timeout);
 ws.close();
-resolve({ status: false, message: err.message });
+resolve({ status: false });
 }
 }
 if (msg.event === 'pusher_internal:subscription_succeeded') {
@@ -105,10 +101,10 @@ headers: {
 'phone-model': '23127PN0CC'
 }
 });
-} catch (err: any) {
+} catch (err) {
 clearTimeout(timeout);
 ws.close();
-resolve({ status: false, message: err.message });
+resolve({ status: false });
 }
 }
 if (msg.event === 'client-message') {
@@ -120,16 +116,41 @@ resolve({ status: true, reply: msgData.content });
 }
 }
 });
-ws.on('error', (err) => {
+ws.on('error', () => {
 clearTimeout(timeout);
-resolve({ status: false, message: err.message });
+resolve({ status: false });
 });
-} catch (err: any) {
-resolve({ status: false, message: err.message });
+} catch (err) {
+resolve({ status: false });
 }
 });
-return NextResponse.json(reply);
+}
+
+export async function POST(req: Request) {
+const auth = await checkApikey(req);
+if (!auth.status) return auth.response;
+try {
+const body = await req.json().catch(() => ({}));
+const { robotId, prompt } = body;
+if (!robotId || !prompt) {
+addFail();
+return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
+}
+const result: any = await chatHiWaifu(robotId, prompt);
+if (!result || !result.status) {
+addFail();
+return NextResponse.json({ status: false, message: message.scrape.fetchFailed }, { status: 500 });
+}
+addSuccess();
+return NextResponse.json({
+status: true,
+message: message.status.success,
+creator: "@Zqwis-Apis",
+limit_left: auth.user?.role === "user" ? auth.user.limit : "UNLIMITED",
+data: { reply: result.reply }
+}, { status: 200 });
 } catch (err) {
+addFail();
 return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
 }
 }
