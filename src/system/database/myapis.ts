@@ -30,6 +30,16 @@ example: "/api/v1/tools/removebg@magicstudio",
 curl: `curl -X POST "<DOMAIN>/api/v1/tools/removebg@magicstudio?apikey=<apikey>" -F "image=@/path/to/your/image.jpg"`
 },
 {
+name: "MediaFire Uploader",
+category: "uploader",
+method: "POST",
+path: "/api/v1/uploader/upload@mediafire",
+desc: "Upload media/file to MediaFire (URL, buffer)",
+body: ["url"],
+example: "/api/v1/tools/upload@mediafire",
+curl: `curl -X POST "<DOMAIN>/api/v1/uploader/upload@mediafire?apikey=<apikey>" -F "file=@/path/to/your/image.jpg"`
+},
+{
 name: "Search Character (HiWaifu)",
 category: "Search",
 method: "GET",
