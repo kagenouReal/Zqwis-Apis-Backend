@@ -16,7 +16,6 @@ headers: {
 cookie: string;
 session: string;
 token: string;
-
 constructor(
 email: string,
 password: string
@@ -31,7 +30,6 @@ this.cookie = "";
 this.session = "";
 this.token = "";
 }
-
 async upload(
 buffer: Buffer,
 name = `${Date.now()}`
@@ -50,46 +48,36 @@ headers: {
 ...this.headers
 }
 });
-
 if (!Buffer.isBuffer(buffer))
 throw Error("buff.");
-
 if (!this.session || !this.token) {
 let form = new FormData();
-
 form.append("email", this.email);
 form.append("password", this.password);
 form.append("return_user_cookie", "true");
 form.append("remember", "true");
-
 const login = await req(
 `${this.base}/application/login.php`,
 form
 );
-
 this.session =
 login.data?.response?.session_token;
-
 if (!this.session)
 throw Error(
 login.data?.response?.message ||
 message.auth.loginRequired
 );
-
 this.cookie =
 login.headers["set-cookie"]
 ?.map((v: string) =>
 v.split(";")[0]
 )
 .join("; ") || "";
-
 form = new FormData();
-
 form.append("type", "upload");
 form.append("lifespan", "1440");
 form.append("response_format", "json");
 form.append("session_token", this.session);
-
 const token = await req(
 `${this.base}/api/1.5/user/get_action_token.php`,
 form,
@@ -97,26 +85,20 @@ form,
 Cookie: this.cookie
 }
 );
-
 this.token =
 token.data?.response?.action_token;
-
 if (!this.token)
 throw Error(
 token.data?.response?.message ||
 message.auth.invalidToken
 );
 }
-
 const size = buffer.length;
-
 const hash = crypto
 .createHash("sha256")
 .update(buffer)
 .digest("hex");
-
 let form = new FormData();
-
 form.append(
 "uploads",
 JSON.stringify([
@@ -130,10 +112,8 @@ preemptive: "yes"
 }
 ])
 );
-
 form.append("response_format", "json");
 form.append("session_token", this.token);
-
 const check = await req(
 `${this.base}/api/1.5/upload/check.php`,
 form,
@@ -141,16 +121,13 @@ form,
 Cookie: this.cookie
 }
 );
-
 const uploadUrl =
 check.data?.response?.upload_url?.simple;
-
 if (!uploadUrl)
 throw Error(
 check.data?.response?.message ||
 message.scrape.fetchFailed
 );
-
 const upload = await req(
 `${uploadUrl}?folder_key=myfiles&response_format=json&session_token=${this.token}`,
 buffer,
@@ -163,22 +140,17 @@ Cookie: this.cookie,
 "application/octet-stream"
 }
 );
-
 const key =
 upload.data?.response?.doupload?.key;
-
 if (!key)
 throw Error(
 upload.data?.response?.message ||
 message.file.invalid
 );
-
 form = new FormData();
-
 form.append("key", key);
 form.append("response_format", "json");
 form.append("session_token", this.token);
-
 const poll = await req(
 `${this.base}/api/1.5/upload/poll_upload.php`,
 form,
@@ -186,16 +158,13 @@ form,
 Cookie: this.cookie
 }
 );
-
 const d =
 poll.data?.response?.doupload;
-
 if (!d)
 throw Error(
 poll.data?.response?.message ||
 message.api.invalidResponse
 );
-
 const links = await req(
 `${this.base}/api/1.5/file/get_links.php`,
 new URLSearchParams({
@@ -210,7 +179,6 @@ Cookie: this.cookie,
 "application/x-www-form-urlencoded"
 }
 );
-
 return {
 quickkey: d.quickkey,
 filename: d.filename,
@@ -230,66 +198,30 @@ links.data?.response?.links?.[0]
 }
 }
 
-const clients = [
-{
-email: "zqwis1@kage.my",
-password: "zqwis1"
-},
-{
-email: "zqwis2@kage.my",
-password: "zqwis2"
-},
-{
-email: "zqwis3@kage.my",
-password: "zqwis3"
-},
-{
-email: "zqwis4@kage.my",
-password: "zqwis4"
-},
-{
-email: "zqwis5@kage.my",
-password: "zqwis5"
-}
-].map(
-acc =>
-new MediaFireUpload(
-acc.email,
-acc.password
-)
-);
+const clients = [{email: "zqwis1@kage.my",password: "zqwis1"},{email: "zqwis2@kage.my",password: "zqwis2"},{email: "zqwis3@kage.my",password: "zqwis3"},{email: "zqwis4@kage.my",password: "zqwis4"},{email: "zqwis5@kage.my",password: "zqwis5"}].map(acc =>new MediaFireUpload(acc.email,acc.password));
 
 export async function POST(
 req: Request
 ) {
 const auth =
 await checkApikey(req);
-
 if (!auth.status)
 return auth.response;
-
 try {
 const type =
 req.headers.get("content-type") || "";
-
 let buffer: Buffer | null = null;
-
 let filename =
 `${Date.now()}`;
-
 if (
 type.includes("multipart/form-data")
 ) {
-
 const form =
 await req.formData();
-
 const file =
 form.get("file") as File;
-
 if (!file) {
 addFail();
-
 return NextResponse.json(
 {
 status: false,
@@ -301,33 +233,23 @@ status: 400
 }
 );
 }
-
 filename = file.name;
-
 buffer = Buffer.from(
 await file.arrayBuffer()
 );
-
 }
-
 else if (
 type.includes("application/json")
 ) {
-
 const body =
 await req
 .json()
 .catch(() => ({}));
-
 if (body.url) {
-
 const fetchFile =
 await fetch(body.url);
-
 if (!fetchFile.ok) {
-
 addFail();
-
 return NextResponse.json(
 {
 status: false,
@@ -339,32 +261,22 @@ status: 400
 }
 );
 }
-
 buffer = Buffer.from(
 await fetchFile.arrayBuffer()
 );
-
 filename =
 body.filename || filename;
-
 }
-
 else if (body.base64) {
-
 buffer = Buffer.from(
 body.base64,
 "base64"
 );
-
 filename =
 body.filename || filename;
-
 }
-
 else {
-
 addFail();
-
 return NextResponse.json(
 {
 status: false,
@@ -377,11 +289,8 @@ status: 400
 );
 }
 }
-
 else {
-
 addFail();
-
 return NextResponse.json(
 {
 status: false,
@@ -393,11 +302,8 @@ status: 400
 }
 );
 }
-
 if (!buffer) {
-
 addFail();
-
 return NextResponse.json(
 {
 status: false,
@@ -409,7 +315,6 @@ status: 400
 }
 );
 }
-
 const mf =
 clients[
 Math.floor(
@@ -417,15 +322,12 @@ Math.random() *
 clients.length
 )
 ];
-
 const result =
 await mf.upload(
 buffer,
 filename
 );
-
 addSuccess();
-
 return NextResponse.json(
 {
 status: true,
@@ -442,11 +344,8 @@ data: result
 status: 200
 }
 );
-
 } catch (err: any) {
-
 addFail();
-
 return NextResponse.json(
 {
 status: false,

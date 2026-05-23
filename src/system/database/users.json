@@ -12,7 +12,28 @@
       "10.54.249.244"
     ],
     "lastReset": 1778752191184,
-    "createdAt": "2026-05-08T17:41:13.229Z"
+    "createdAt": "2026-05-08T17:41:13.229Z",
+    "premiumStatus": {
+      "isPremium": false,
+      "premiumType": null,
+      "premiumExpiry": null,
+      "startDate": null
+    },
+    "coins": {
+      "total": 50,
+      "earned": 50,
+      "spent": 0,
+      "lastUpdated": 1779576533075
+    },
+    "missions": {
+      "completed": [],
+      "inProgress": []
+    },
+    "activity": {
+      "lastLogin": null,
+      "loginStreak": 0,
+      "totalLogins": 0
+    }
   },
   {
     "username": "user",
@@ -23,6 +44,27 @@
     "maxIpQuota": 3,
     "whitelistIp": [],
     "lastReset": 1778752251889,
-    "createdAt": "2026-05-08T17:41:55.409Z"
+    "createdAt": "2026-05-08T17:41:55.409Z",
+    "premiumStatus": {
+      "isPremium": false,
+      "premiumType": null,
+      "premiumExpiry": null,
+      "startDate": null
+    },
+    "coins": {
+      "total": 50,
+      "earned": 50,
+      "spent": 0,
+      "lastUpdated": 1779576533075
+    },
+    "missions": {
+      "completed": [],
+      "inProgress": []
+    },
+    "activity": {
+      "lastLogin": null,
+      "loginStreak": 0,
+      "totalLogins": 0
+    }
   }
 ]
