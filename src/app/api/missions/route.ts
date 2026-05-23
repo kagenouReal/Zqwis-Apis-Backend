@@ -79,10 +79,13 @@ export async function GET(req: NextRequest) {
     }
 
     // Enrich with mission details
-    const enrichedMissions = {
-      completed: result.missions.completed,
-      available: [],
-    };
+    const enrichedMissions: {
+  completed: string[];
+  available: any[];
+} = {
+  completed: result.missions.completed,
+  available: [],
+};
 
     // Add available missions
     AVAILABLE_MISSIONS.daily.forEach((mission) => {

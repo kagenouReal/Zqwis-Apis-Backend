@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     if (!result.status) {
       return NextResponse.json(
-        { status: false, message: result.error },
+        { status: false, message: "error" in result ? result.error : "Unknown error" },
         { status: 400 }
       );
     }
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     if (!result.status) {
       return NextResponse.json(
-        { status: false, message: result.error },
+        { status: false, message: "error" in result ? result.error : "Unknown error" },
         { status: 400 }
       );
     }

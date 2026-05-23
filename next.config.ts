@@ -43,7 +43,7 @@ allowedDevOrigins: [''],
     // Premium 7 hari
     PREMIUM_7DAY_COINS: "500",
     PREMIUM_7DAY_LIMIT: "1000",
-    
+    ENABLE_CRON: "true", // ubah jadi "true" kalau mau aktif
     // Premium 30 hari
     PREMIUM_30DAY_COINS: "1500",
     PREMIUM_30DAY_LIMIT: "5000",
