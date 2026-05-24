@@ -66,5 +66,45 @@
       "loginStreak": 0,
       "totalLogins": 0
     }
+  },
+  {
+    "username": "test",
+    "password": "123",
+    "role": "user",
+    "apikey": "Zqwis_7190be09e283",
+    "limit": 10,
+    "maxIpQuota": 3,
+    "whitelistIp": [],
+    "lastReset": 1779578460954,
+    "createdAt": "2026-05-23T23:21:00.954Z",
+    "premiumStatus": {
+      "isPremium": false,
+      "premiumType": null,
+      "premiumExpiry": null,
+      "startDate": null
+    },
+    "coins": {
+      "total": 50,
+      "earned": 50,
+      "spent": 0,
+      "lastUpdated": 1779578460955
+    },
+    "coinHistory": [
+      {
+        "type": "earn",
+        "amount": 50,
+        "reason": "Welcome bonus",
+        "timestamp": 1779578460955
+      }
+    ],
+    "missions": {
+      "completed": [],
+      "inProgress": []
+    },
+    "activity": {
+      "lastLogin": null,
+      "loginStreak": 0,
+      "totalLogins": 0
+    }
   }
 ]
