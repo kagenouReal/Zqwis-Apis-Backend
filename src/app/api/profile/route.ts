@@ -39,8 +39,8 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  let users = await readDB();
-  const userIndex = users.findIndex((u: any) => u.username === token.name);
+  const users = await readDB();
+  const userIndex = users.findIndex((u: { username: string }) => u.username === token.name);
   if (userIndex === -1) return NextResponse.json({ status: false, message: message.user.notFound }, { status: 404 });
 
   if (AUTO_RESET_LIMIT) {
@@ -88,8 +88,8 @@ export async function PUT(req: NextRequest) {
     const rootOwner = process.env.OWNER_USER || "owner";
     if (token.name === rootOwner) return NextResponse.json({ status: false, message: message.auth.forbidden }, { status: 403 });
 
-    let users = await readDB();
-    const userIndex = users.findIndex((u: any) => u.username === token.name);
+    const users = await readDB();
+    const userIndex = users.findIndex((u: { username: string }) => u.username === token.name);
     if (userIndex === -1) return NextResponse.json({ status: false, message: message.user.notFound }, { status: 404 });
 
     if (!users[userIndex].whitelistIp) users[userIndex].whitelistIp = [];
@@ -104,7 +104,7 @@ export async function PUT(req: NextRequest) {
     if (action === "change_username") {
       const newUsername = payload?.newUsername;
       if (!newUsername) return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
-      if (users.find((u: any) => u.username === newUsername)) return NextResponse.json({ status: false, message: message.user.exists }, { status: 400 });
+      if (users.find((u: { username: string }) => u.username === newUsername)) return NextResponse.json({ status: false, message: message.user.exists }, { status: 400 });
       users[userIndex].username = newUsername;
       await writeDB(users);
       return NextResponse.json({ status: true, message: message.status.success });
@@ -142,7 +142,7 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json({ status: false, message: message.input.wrong }, { status: 400 });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
   }
 }

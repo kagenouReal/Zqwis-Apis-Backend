@@ -1,8 +1,8 @@
-import "./(main)/globals.css"; 
+import "./(main)/globals.css";
 
 export const metadata = {
-title: "Zqwis - Apis",
-description: "Powered By KagenouReal",
+  title: "Zqwis - Apis",
+  description: "Powered By KagenouReal",
 };
 
 export default function RootLayout({

@@ -50,13 +50,18 @@ function useDarkMode() {
 const [isDark, setIsDark] = useState(false);
 const [mounted, setMounted] = useState(false);
 useEffect(() => {
-setMounted(true);
-const saved = localStorage.getItem("theme");
-const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-const dark = saved ? saved === "dark" : prefersDark;
-setIsDark(dark);
-document.documentElement.classList.toggle("dark", dark);
+  setMounted(true);
+  const saved = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const dark = saved ? saved === "dark" : prefersDark;
+  setIsDark(dark);
+  if (dark) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
 }, []);
+
 const toggle = useCallback(() => {
 setIsDark(prev => {
 const next = !prev;
@@ -322,8 +327,9 @@ All requests require a valid{" "}
 and a whitelisted IP address.
 </p>
 <p className="text-[10px] text-zinc-400 mt-1 font-mono">
-Don't hit my backend raw, broh. All requests are logged 👀
+  Don&apos;t hit my backend raw, broh. All requests are logged 👀
 </p>
+
 </div>
 </div>
 </div>

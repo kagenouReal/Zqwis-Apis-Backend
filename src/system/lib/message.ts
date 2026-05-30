@@ -11,7 +11,6 @@ invalidToken: "Invalid token.",
 sessionExpired: "Session expired.",
 forbidden: "Forbidden.",
 },
-
 status: {
 success: "Success.",
 done: "Done.",
@@ -23,7 +22,6 @@ pending: "Pending.",
 failed: "Failed.",
 error: "Something went wrong.",
 },
-
 api: {
 notFound: "Endpoint not found.",
 disabled: "API disabled.",
@@ -35,7 +33,6 @@ invalidResponse: "Invalid response.",
 fetchFailed: "Failed to fetch data.",
 unavailable: "Service unavailable.",
 },
-
 input: {
 missing: "Required field missing.",
 invalid: "Invalid input.",
@@ -46,7 +43,6 @@ tooLong: "Input too long.",
 invalidFormat: "Invalid format.",
 alreadyExists: "Already exists.",
 },
-
 user: {
 notFound: "User not found.",
 exists: "User already exists.",
@@ -59,7 +55,6 @@ invalidPassword: "Wrong password.",
 locked: "User locked.",
 banned: "User banned.",
 },
-
 apikey: {
 generated: "API key generated.",
 reset: "API key reset.",
@@ -67,7 +62,6 @@ exhausted: "Limit exhausted.",
 invalid: "Invalid API key.",
 required: "API key required.",
 },
-
 ip: {
 missing: "IP required.",
 invalid: "Invalid IP.",
@@ -79,7 +73,6 @@ whitelistRequired: "No IP whitelisted.",
 notWhitelisted: "IP not whitelisted.",
 quotaFull: "IP quota reached.",
 },
-
 limit: {
 updated: "Limit updated.",
 exceeded: "Limit exceeded.",
@@ -87,14 +80,12 @@ exhausted: "No limit left.",
 reset: "Limit reset.",
 invalidAmount: "Invalid limit amount.",
 },
-
 db: {
 readFail: "Database read failed.",
 writeFail: "Database write failed.",
 corrupted: "Database corrupted.",
 notReady: "Database not ready.",
 },
-
 system: {
 online: "System online.",
 offline: "System offline.",
@@ -104,14 +95,12 @@ rebooting: "System rebooting.",
 maintenance: "System maintenance.",
 defense: "System defense active.",
 },
-
 scrape: {
 noResult: "No result found.",
 fetchFailed: "Fetch failed.",
 invalidResponse: "Invalid source response.",
 blocked: "Source blocked request.",
 },
-
 file: {
 missing: "File required.",
 invalid: "Invalid file.",
@@ -120,17 +109,31 @@ uploaded: "Upload success.",
 deleted: "File deleted.",
 unsupported: "Unsupported file type.",
 },
-
 exec: {
 missing: "Command required.",
 success: "Command executed.",
 failed: "Command failed.",
 blocked: "Command blocked.",
 },
-
 profile: {
 loaded: "Profile loaded.",
 updated: "Profile updated.",
 locked: "Profile locked.",
+},
+whatsapp: {
+connected: "Bot connected.",
+disconnected: "Bot disconnected.",
+alreadyConnected: "Bot already connected.",
+pairingCode: "Pairing code generated.",
+notFound: "Bot not found.",
+},
+mission: {
+notFound: "Mission not found.",
+completed: "Mission completed.",
+},
+coins: {
+added: "Coins added.",
+set: "Coins set.",
+reset: "Coins reset.",
 }
 };

@@ -23,6 +23,7 @@ AUTO_RESET_LIMIT: "true",
 LIMIT_IP_USER: "3",
 LIMIT_IP_ADMIN: "10",
 //===============
+AUTO_RESTORE_WHATSAPP: "true",
 ENABLE_CRON: "true", // ubah jadi "true" kalau mau aktif
 // Initial coins untuk user baru
 INITIAL_COINS: "50",

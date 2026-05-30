@@ -2,8 +2,8 @@ import { readDB, writeDB } from "@/system/lib/db";
 
 export async function addCoins(username: string, amount: number, reason: string = "Unknown") {
   try {
-    let users = await readDB();
-    const userIndex = users.findIndex((u: any) => u.username === username);
+    const users = await readDB();
+    const userIndex = users.findIndex((u: { username: string }) => u.username === username);
     
     if (userIndex === -1) return { status: false, error: "User not found" };
     
@@ -25,15 +25,15 @@ export async function addCoins(username: string, amount: number, reason: string 
     
     await writeDB(users);
     return { status: true, coins: users[userIndex].coins };
-  } catch (e) {
-    return { status: false, error: (e as any).message };
+  } catch (e: unknown) {
+    return { status: false, error: (e as Error).message };
   }
 }
 
 export async function spendCoins(username: string, amount: number, reason: string = "Unknown") {
   try {
-    let users = await readDB();
-    const userIndex = users.findIndex((u: any) => u.username === username);
+    const users = await readDB();
+    const userIndex = users.findIndex((u: { username: string }) => u.username === username);
     
     if (userIndex === -1) return { status: false, error: "User not found" };
     
@@ -59,15 +59,15 @@ export async function spendCoins(username: string, amount: number, reason: strin
     
     await writeDB(users);
     return { status: true, coins: users[userIndex].coins };
-  } catch (e) {
-    return { status: false, error: (e as any).message };
+  } catch (e: unknown) {
+    return { status: false, error: (e as Error).message };
   }
 }
 
 export async function getCoins(username: string) {
   try {
     const users = await readDB();
-    const user = users.find((u: any) => u.username === username);
+    const user = users.find((u: { username: string }) => u.username === username);
     
     if (!user) return { status: false, error: "User not found" };
     
@@ -75,15 +75,15 @@ export async function getCoins(username: string) {
       status: true,
       coins: user.coins || { total: 0, earned: 0, spent: 0, lastUpdated: Date.now() },
     };
-  } catch (e) {
-    return { status: false, error: (e as any).message };
+  } catch (e: unknown) {
+    return { status: false, error: (e as Error).message };
   }
 }
 
 export async function isPremium(username: string) {
   try {
     const users = await readDB();
-    const user = users.find((u: any) => u.username === username);
+    const user = users.find((u: { username: string }) => u.username === username);
     
     if (!user) return { status: false };
     
@@ -106,14 +106,14 @@ export async function isPremium(username: string) {
       type: premiumStatus.premiumType,
       expiry: premiumStatus.premiumExpiry,
     };
-  } catch (e) {
-    return { status: false, error: (e as any).message };
+  } catch (e: unknown) {
+    return { status: false, error: (e as Error).message };
   }
 }
 
 export async function buyPremium(username: string, packageType: "7day" | "30day" | "permanent") {
   try {
-    const PREMIUM_PACKAGES: any = {
+    const PREMIUM_PACKAGES: Record<string, { duration: number, coinsRequired: number }> = {
       "7day": {
         duration: 7 * 24 * 60 * 60 * 1000,
         coinsRequired: 500,
@@ -137,10 +137,10 @@ export async function buyPremium(username: string, packageType: "7day" | "30day"
     }
     
     const spendResult = await spendCoins(username, pkg.coinsRequired, `Premium ${packageType}`);
-    if (!spendResult.status) return spendResult;
+    if (!spendResult.status || !spendResult.coins) return spendResult;
     
-    let users = await readDB();
-    const userIndex = users.findIndex((u: any) => u.username === username);
+    const users = await readDB();
+    const userIndex = users.findIndex((u: { username: string }) => u.username === username);
     
     if (!users[userIndex].premiumStatus) {
       users[userIndex].premiumStatus = {};
@@ -167,15 +167,15 @@ export async function buyPremium(username: string, packageType: "7day" | "30day"
       premium: users[userIndex].premiumStatus,
       coinsLeft: spendResult.coins.total,
     };
-  } catch (e) {
-    return { status: false, error: (e as any).message };
+  } catch (e: unknown) {
+    return { status: false, error: (e as Error).message };
   }
 }
 
 export async function getPremiumStatus(username: string) {
   try {
     const users = await readDB();
-    const user = users.find((u: any) => u.username === username);
+    const user = users.find((u: { username: string }) => u.username === username);
     
     if (!user) return { status: false, error: "User not found" };
     
@@ -202,15 +202,15 @@ export async function getPremiumStatus(username: string) {
       expiry: premiumStatus.premiumExpiry,
       startDate: premiumStatus.startDate,
     };
-  } catch (e) {
-    return { status: false, error: (e as any).message };
+  } catch (e: unknown) {
+    return { status: false, error: (e as Error).message };
   }
 }
 
 export async function checkMission(username: string, missionId: string) {
   try {
     const users = await readDB();
-    const userIndex = users.findIndex((u: any) => u.username === username);
+    const userIndex = users.findIndex((u: { username: string }) => u.username === username);
     
     if (userIndex === -1) return { status: false, error: "User not found" };
     
@@ -222,15 +222,15 @@ export async function checkMission(username: string, missionId: string) {
       status: true,
       completed: users[userIndex].missions.completed.includes(missionId),
     };
-  } catch (e) {
-    return { status: false, error: (e as any).message };
+  } catch (e: unknown) {
+    return { status: false, error: (e as Error).message };
   }
 }
 
 export async function completeMission(username: string, missionId: string, reward: number = 0) {
   try {
-    let users = await readDB();
-    const userIndex = users.findIndex((u: any) => u.username === username);
+    const users = await readDB();
+    const userIndex = users.findIndex((u: { username: string }) => u.username === username);
     
     if (userIndex === -1) return { status: false, error: "User not found" };
     
@@ -251,15 +251,15 @@ export async function completeMission(username: string, missionId: string, rewar
     await writeDB(users);
     
     return { status: true, reward };
-  } catch (e) {
-    return { status: false, error: (e as any).message };
+  } catch (e: unknown) {
+    return { status: false, error: (e as Error).message };
   }
 }
 
 export async function getMissions(username: string) {
   try {
     const users = await readDB();
-    const user = users.find((u: any) => u.username === username);
+    const user = users.find((u: { username: string }) => u.username === username);
     
     if (!user) return { status: false, error: "User not found" };
     
@@ -267,7 +267,7 @@ export async function getMissions(username: string) {
       status: true,
       missions: user.missions || { completed: [] },
     };
-  } catch (e) {
-    return { status: false, error: (e as any).message };
+  } catch (e: unknown) {
+    return { status: false, error: (e as Error).message };
   }
 }
