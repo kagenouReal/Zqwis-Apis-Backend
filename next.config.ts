@@ -1,0 +1,73 @@
+import { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  devIndicators: {
+    appIsrStatus: false,
+  },
+  allowedDevOrigins: [''],
+  env: {
+    // === AUTHENTICATION & SECURITY ===
+    NEXTAUTH_SECRET: "Kagenonchalant-Zqwis-Apis",
+    OWNER_USER: "kage",
+    OWNER_PASS: "123",
+    OWNER_APIKEY: "Kagenonchalant",
+    GLOBAL_APIKEY: "Zqwis_",
+
+    // === RATE LIMITS & QUOTAS ===
+    RATE_MAX_REQUESTS: "100,10000",
+    API_MAX_REQUESTS: "40,10000",
+    LIMIT_USER: "10",
+    LIMIT_ADMIN: "1000",
+    LIMIT_RESET_TIME: "3600000",
+    AUTO_RESET_LIMIT: "true",
+    LIMIT_IP_USER: "3",
+    LIMIT_IP_ADMIN: "10",
+
+    // === COIN SYSTEM ===
+    INITIAL_COINS: "50",
+    WELCOME_BONUS: "50",
+    DAILY_LOGIN_BONUS: "10",
+    API_CALL_REWARD_INTERVAL: "10",
+    API_CALL_REWARD_AMOUNT: "5",
+
+    // === PREMIUM SYSTEM ===
+    PREMIUM_7DAY_COINS: "500",
+    PREMIUM_7DAY_LIMIT: "1000",
+    PREMIUM_30DAY_COINS: "1500",
+    PREMIUM_30DAY_LIMIT: "5000",
+    PREMIUM_PERMANENT_COINS: "5000",
+    PREMIUM_PERMANENT_LIMIT: "999999",
+
+    // === BUY LIMIT PACKAGES ===
+    LIMIT_100_COINS: "100",
+    LIMIT_500_COINS: "450",
+    LIMIT_1000_COINS: "800",
+
+    // === MISSIONS & ACTIVITY ===
+    ENABLE_MISSIONS: "true",
+    DAILY_MISSIONS_RESET_HOUR: "0",
+    MAX_DAILY_MISSIONS: "3",
+    ENABLE_ACTIVITY_TRACKING: "true",
+    LOGIN_STREAK_BONUS: "50",
+    LOGIN_STREAK_TARGET: "7",
+
+    // === WHATSAPP SETTINGS ===
+    WA_GLOBAL_OWNER: "601112260297",
+    WA_PREFIX: ".,!,/",
+    WA_PAIRINGCODE: "ZQWISBOT",
+    WA_USE_PAIRING_CODE: "true",
+    WA_MAXPAIRBOT_OWNER: "999",
+    WA_MAXPAIRBOT_ADMIN: "10",
+    WA_MAXPAIRBOT_PREMIUM: "3",
+    WA_MAXPAIRBOT_USER: "1",
+  },
+  reactStrictMode: true,
+  experimental: {
+    serverActions: {},
+  },
+  images: {
+    unoptimized: true,
+  },
+};
+
+export default nextConfig;
