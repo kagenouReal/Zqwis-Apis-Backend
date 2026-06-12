@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { WABot } from "@/system/lib/whatsapp";
 import { message } from "@/system/lib/responses";
 import { bootstrapSystem } from "@/system/lib/bootstrap";
+import { getUserByUsername } from "@/system/lib/account-db";
 
 //==================
 export const runtime = "nodejs";
@@ -14,17 +15,26 @@ try {
 await bootstrapSystem();
 const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 if (!token?.name) return NextResponse.json({ status: false, message: message.auth.unauthorized }, { status: 401 });
-const user = token.name;
-const role = (token.role as string) || "user";
-const max = WABot.getMaxBots(role);
+
+const username = token.name;
+const dbUser = getUserByUsername(username);
+if (!dbUser) return NextResponse.json({ status: false, message: message.user.notFound }, { status: 404 });
+
+// Determine effective role for WhatsApp limits
+let effectiveRole = dbUser.role || "user";
+if (effectiveRole === "user" && dbUser.premiumStatus?.isPremium) {
+    effectiveRole = "premium";
+}
+
+const max = WABot.getMaxBots(effectiveRole);
 const allBots = WABot.getBots();
 
-// System filtering: Only show bots that belong to THIS user (from cookie session)
-const userBots = allBots.filter(v => v.username && v.username.toLowerCase() === user.toLowerCase());
+// System filtering: Only show bots that belong to THIS user
+const userBots = allBots.filter(v => v.username && v.username.toLowerCase() === username.toLowerCase());
 
 return NextResponse.json({
 status: true,
-user: { user, role },
+user: { username, role: effectiveRole },
 limits: { used: userBots.length, max, remaining: max === Infinity ? "Infinity" : max - userBots.length },
 bots: userBots.map(b => ({ 
     id: `${b.username}:${b.phoneNumber}`, 
