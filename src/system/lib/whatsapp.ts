@@ -311,10 +311,4 @@ static getMaxBots(role: string) {
   };
   return limits[role] || 1;
 }
-}| 10,
-    premium: Number(process.env.WA_MAXPAIRBOT_PREMIUM) || 3,
-    user: Number(process.env.WA_MAXPAIRBOT_USER) || 1
-  };
-  return limits[role] || 1;
-}
 }

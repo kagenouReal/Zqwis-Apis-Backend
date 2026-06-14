@@ -14,7 +14,7 @@ const buffer = await fs.readFile(dbPath);
 return new NextResponse(buffer, {
     headers: {
         "Content-Type": "application/x-sqlite3",
-        "Content-Disposition": "attachment; filename="database.db"",
+        "Content-Disposition": 'attachment; filename="database.db"',
     }
 });
 } catch {
