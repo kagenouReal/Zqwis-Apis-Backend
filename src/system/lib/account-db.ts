@@ -5,191 +5,126 @@ import fs from "fs-extra";
 import path from "path";
 
 //==================
-export const generateApiKey = () => process.env.GLOBAL_APIKEY + crypto.randomBytes(6).toString("hex");
+// PRE-COMPILED STATEMENTS: Perintah SQL dikompilasi sekali pas startup
+// Biar backend gak perlu mikir ulang tiap ada request masuk.
+const stmtSelectAll = db.prepare("SELECT * FROM users");
+const stmtSelectByApiKey = db.prepare("SELECT * FROM users WHERE apikey = ?");
+const stmtSelectByUsername = db.prepare("SELECT * FROM users WHERE username = ?");
+const stmtUpdateLimit = db.prepare('UPDATE users SET "limit" = ? WHERE username = ?');
+const stmtResetLimit = db.prepare('UPDATE users SET "limit" = ?, lastReset = ? WHERE username = ?');
+const stmtUpdateCoins = db.prepare('UPDATE users SET coins = ?, coinHistory = ? WHERE username = ?');
+const stmtUpdatePremium = db.prepare('UPDATE users SET premiumStatus = ? WHERE username = ?');
+const stmtUpdateWhitelist = db.prepare('UPDATE users SET whitelistIp = ? WHERE username = ?');
+const stmtUpdateMissions = db.prepare('UPDATE users SET missions = ? WHERE username = ?');
+const stmtUpdateActivity = db.prepare('UPDATE users SET activity = ? WHERE username = ?');
+const stmtUpdateIpQuota = db.prepare('UPDATE users SET maxIpQuota = ? WHERE username = ?');
+const stmtDeleteUser = db.prepare("DELETE FROM users WHERE username = ?");
+const stmtInsertUser = db.prepare(`
+    INSERT OR REPLACE INTO users (
+        username, password, role, apikey, "limit", maxIpQuota, 
+        whitelistIp, createdAt, premiumStatus, 
+        coins, coinHistory, missions, activity
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`);
 
 //==================
-// Helper to hash password
-export const hashPassword = async (password: string) => {
-    return await bcrypt.hash(password, 10);
-};
+export const generateApiKey = () => (process.env.GLOBAL_APIKEY || "") + crypto.randomBytes(6).toString("hex");
 
-// Helper to compare password
-export const comparePassword = async (password: string, hash: string) => {
-    return await bcrypt.compare(password, hash);
-};
+export const hashPassword = async (password: string) => await bcrypt.hash(password, 10);
+export const comparePassword = async (password: string, hash: string) => await bcrypt.compare(password, hash);
 
-//==================
-// Helper to parse JSON strings from SQLite
 const parseJSON = (str: string) => {
-    try {
-        return JSON.parse(str);
-    } catch {
-        return {};
-    }
+    try { return JSON.parse(str); } catch { return {}; }
+};
+const parseJSONArray = (str: string) => {
+    try { return JSON.parse(str); } catch { return []; }
 };
 
-const parseJSONArray = (str: string) => {
-    try {
-        return JSON.parse(str);
-    } catch {
-        return [];
-    }
+const mapUser = (user: any) => {
+    if (!user) return null;
+    return {
+        ...user,
+        whitelistIp: parseJSONArray(user.whitelistIp),
+        premiumStatus: parseJSON(user.premiumStatus),
+        coins: parseJSON(user.coins),
+        coinHistory: parseJSONArray(user.coinHistory),
+        missions: parseJSON(user.missions),
+        activity: parseJSON(user.activity)
+    };
 };
 
 //==================
 export async function readDB() {
     try {
-        const users = db.prepare("SELECT * FROM users").all();
-        return users.map((user: any) => ({
-            ...user,
-            whitelistIp: parseJSONArray(user.whitelistIp),
-            premiumStatus: parseJSON(user.premiumStatus),
-            coins: parseJSON(user.coins),
-            coinHistory: parseJSONArray(user.coinHistory),
-            missions: parseJSON(user.missions),
-            activity: parseJSON(user.activity)
-        }));
+        const users = stmtSelectAll.all();
+        return users.map(mapUser);
     } catch (err) {
         console.error("Database read failed:", err);
         return [];
     }
 }
 
-//==================
 export async function writeDB(data: any[]) {
-    const insert = db.prepare(`
-        INSERT OR REPLACE INTO users (
-            username, password, role, apikey, "limit", maxIpQuota, 
-            whitelistIp, createdAt, premiumStatus, 
-            coins, coinHistory, missions, activity
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
     const transaction = db.transaction((users) => {
         for (const user of users) {
-            insert.run(
-                user.username,
-                user.password,
-                user.role,
-                user.apikey,
-                user.limit,
-                user.maxIpQuota,
-                JSON.stringify(user.whitelistIp),
-                user.createdAt,
-                JSON.stringify(user.premiumStatus),
-                JSON.stringify(user.coins),
-                JSON.stringify(user.coinHistory),
-                JSON.stringify(user.missions),
-                JSON.stringify(user.activity)
+            stmtInsertUser.run(
+                user.username, user.password, user.role, user.apikey,
+                user.limit, user.maxIpQuota, JSON.stringify(user.whitelistIp),
+                user.createdAt, JSON.stringify(user.premiumStatus),
+                JSON.stringify(user.coins), JSON.stringify(user.coinHistory),
+                JSON.stringify(user.missions), JSON.stringify(user.activity)
             );
         }
     });
-
-    try {
-        transaction(data);
-    } catch (err) {
-        console.error("Database write failed:", err);
-    }
+    try { transaction(data); } catch (err) { console.error("Database write failed:", err); }
 }
 
-// Specific helper for performance (to be used in api-guard)
 export function getUserByApiKey(apikey: string) {
-    const user: any = db.prepare("SELECT * FROM users WHERE apikey = ?").get(apikey);
-    if (!user) return null;
-    return {
-        ...user,
-        whitelistIp: parseJSONArray(user.whitelistIp),
-        premiumStatus: parseJSON(user.premiumStatus),
-        coins: parseJSON(user.coins),
-        coinHistory: parseJSONArray(user.coinHistory),
-        missions: parseJSON(user.missions),
-        activity: parseJSON(user.activity)
-    };
+    return mapUser(stmtSelectByApiKey.get(apikey));
 }
 
 export function getUserByUsername(username: string) {
-    const user: any = db.prepare("SELECT * FROM users WHERE username = ?").get(username);
-    if (!user) return null;
-    return {
-        ...user,
-        whitelistIp: parseJSONArray(user.whitelistIp),
-        premiumStatus: parseJSON(user.premiumStatus),
-        coins: parseJSON(user.coins),
-        coinHistory: parseJSONArray(user.coinHistory),
-        missions: parseJSON(user.missions),
-        activity: parseJSON(user.activity)
-    };
+    return mapUser(stmtSelectByUsername.get(username));
 }
 
 export function updateUserLimit(username: string, limit: number) {
-    db.prepare('UPDATE users SET "limit" = ? WHERE username = ?').run(limit, username);
+    stmtUpdateLimit.run(limit, username);
 }
 
 export function resetUserLimit(username: string, limit: number, now: number) {
-    db.prepare('UPDATE users SET "limit" = ?, lastReset = ? WHERE username = ?').run(limit, now, username);
+    stmtResetLimit.run(limit, now, username);
 }
 
-//==================
-// Targeted Update Functions
-//==================
-
 export function updateUserCoins(username: string, coins: any, coinHistory: any[]) {
-    db.prepare('UPDATE users SET coins = ?, coinHistory = ? WHERE username = ?').run(
-        JSON.stringify(coins),
-        JSON.stringify(coinHistory),
-        username
-    );
+    stmtUpdateCoins.run(JSON.stringify(coins), JSON.stringify(coinHistory), username);
 }
 
 export function updateUserPremium(username: string, premiumStatus: any) {
-    db.prepare('UPDATE users SET premiumStatus = ? WHERE username = ?').run(
-        JSON.stringify(premiumStatus),
-        username
-    );
+    stmtUpdatePremium.run(JSON.stringify(premiumStatus), username);
 }
 
 export function updateUserWhitelist(username: string, whitelistIp: string[]) {
-    db.prepare('UPDATE users SET whitelistIp = ? WHERE username = ?').run(
-        JSON.stringify(whitelistIp),
-        username
-    );
+    stmtUpdateWhitelist.run(JSON.stringify(whitelistIp), username);
 }
 
 export function updateUserAccount(username: string, data: { password?: string, username?: string, apikey?: string }) {
+    // Dynamic update masih perlu prepare manual karena field-nya berubah-ubah
     const fields: string[] = [];
     const values: any[] = [];
-    
-    if (data.password) {
-        fields.push("password = ?");
-        values.push(data.password);
-    }
-    if (data.username) {
-        fields.push("username = ?");
-        values.push(data.username);
-    }
-    if (data.apikey) {
-        fields.push("apikey = ?");
-        values.push(data.apikey);
-    }
-    
+    if (data.password) { fields.push("password = ?"); values.push(data.password); }
+    if (data.username) { fields.push("username = ?"); values.push(data.username); }
+    if (data.apikey) { fields.push("apikey = ?"); values.push(data.apikey); }
     if (fields.length === 0) return;
-    
     values.push(username);
-    const query = `UPDATE users SET ${fields.join(", ")} WHERE username = ?`;
-    db.prepare(query).run(...values);
+    db.prepare(`UPDATE users SET ${fields.join(", ")} WHERE username = ?`).run(...values);
 }
 
 export function updateUserMissions(username: string, missions: any) {
-    db.prepare('UPDATE users SET missions = ? WHERE username = ?').run(
-        JSON.stringify(missions),
-        username
-    );
+    stmtUpdateMissions.run(JSON.stringify(missions), username);
 }
 
 export function deleteUser(username: string) {
-    db.prepare("DELETE FROM users WHERE username = ?").run(username);
-    
-    // Cleanup WhatsApp session directories
+    stmtDeleteUser.run(username);
     const waDir = path.join(process.cwd(), "src/system/database/whatsapp");
     if (fs.existsSync(waDir)) {
         const entries = fs.readdirSync(waDir);
@@ -202,12 +137,9 @@ export function deleteUser(username: string) {
 }
 
 export function updateUserIpQuota(username: string, quota: number) {
-    db.prepare('UPDATE users SET maxIpQuota = ? WHERE username = ?').run(quota, username);
+    stmtUpdateIpQuota.run(quota, username);
 }
 
 export function updateUserActivity(username: string, activity: any) {
-    db.prepare('UPDATE users SET activity = ? WHERE username = ?').run(
-        JSON.stringify(activity),
-        username
-    );
+    stmtUpdateActivity.run(JSON.stringify(activity), username);
 }

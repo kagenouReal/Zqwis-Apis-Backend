@@ -21,14 +21,14 @@ export async function GET(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token?.name) return NextResponse.json({ status: false, message: message.auth.loginRequired }, { status: 401 });
 
-    const rootOwner = process.env.OWNER_USER || "owner";
-    if (token.name === rootOwner) {
+    const rootOwner = process.env.OWNER_USER;
+    if (rootOwner && token.name === rootOwner) {
         return NextResponse.json({
             status: true,
             data: {
                 username: rootOwner,
                 role: "owner",
-                apikey: process.env.OWNER_APIKEY || "Notdefined",
+                apikey: process.env.OWNER_APIKEY || "undefined",
                 limit: 999999,
                 whitelistIp: [],
                 isRoot: true,
@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
             role: user.role,
             apikey: user.apikey,
             limit: user.limit,
+            maxIpQuota: user.maxIpQuota || 0,
             whitelistIp: user.whitelistIp || [],
             isRoot: false,
             premium: premiumResult.status ? {

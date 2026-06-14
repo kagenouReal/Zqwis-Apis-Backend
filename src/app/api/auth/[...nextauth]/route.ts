@@ -23,7 +23,7 @@ return {
 id: "owner",
 name: credentials.username,
 role: "owner",
-apikey: process.env.OWNER_APIKEY || "MyOwner"
+apikey: process.env.OWNER_APIKEY || "undefined"
 };
 }
 const user = getUserByUsername(credentials.username);

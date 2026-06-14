@@ -7,17 +7,17 @@ const systemIps = ["127.0.0.1", "::1", "::ffff:127.0.0.1", "localhost"];
 //==================
 const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
 //==================
-const apiRateConfig = (process.env.API_MAX_REQUESTS || "10,2000").split(",");
+const apiRateConfig = (process.env.API_MAX_REQUESTS || "").split(",");
 //==================
-const MAX_REQUESTS = parseInt(apiRateConfig[0], 10);
+const MAX_REQUESTS = parseInt(apiRateConfig[0], 10) || 10;
 //==================
-const WINDOW_MS = parseInt(apiRateConfig[1], 10);
+const WINDOW_MS = parseInt(apiRateConfig[1], 10) || 2000;
 //==================
-const LIMIT_USER = parseInt(process.env.LIMIT_USER || "10", 10);
+const LIMIT_USER = parseInt(process.env.LIMIT_USER || "", 10) || 10;
 //==================
-const LIMIT_PREMIUM = parseInt(process.env.LIMIT_PREMIUM || "100", 10);
+const LIMIT_PREMIUM = parseInt(process.env.LIMIT_PREMIUM || "", 10) || 100;
 //==================
-const LIMIT_ADMIN = parseInt(process.env.LIMIT_ADMIN || "1000", 10);
+const LIMIT_ADMIN = parseInt(process.env.LIMIT_ADMIN || "", 10) || 1000;
 //==================
 function checkRateLimit(ip: string) {
     const now = Date.now();

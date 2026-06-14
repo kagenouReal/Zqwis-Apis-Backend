@@ -1,9 +1,10 @@
 import os from "os";
 import db from "./db";
-import fs from "fs-extra";
-import path from "path";
 
 //==================
+// CACHE SYSTEM: Simpen setting di RAM biar gak baca DB terus-terusan
+let settingsCache: Record<string, any> | null = null;
+
 export function getSystemInfo() {
     const totalMem = os.totalmem();
     const freeMem = os.freemem();
@@ -31,7 +32,6 @@ export function getSystemInfo() {
     };
 }
 
-//==================
 function formatUptime(seconds: number) {
     const d = Math.floor(seconds / (3600 * 24));
     const h = Math.floor(seconds % (3600 * 24) / 3600);
@@ -48,6 +48,10 @@ function formatUptime(seconds: number) {
 
 //==================
 export function getSettings() {
+    // Kalau ada di RAM, ambil dari RAM (Instan!)
+    if (settingsCache) return settingsCache;
+
+    // Kalau gak ada (misal baru startup), ambil dari DB terus simpen ke RAM
     const rows = db.prepare("SELECT * FROM settings").all();
     const settings: Record<string, any> = {
         maintenance: false,
@@ -61,6 +65,8 @@ export function getSettings() {
             settings[row.key] = row.value;
         }
     });
+    
+    settingsCache = settings;
     return settings;
 }
 
@@ -68,6 +74,7 @@ export function getSettings() {
 export function updateSetting(key: string, value: any) {
     const valStr = JSON.stringify(value);
     db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").run(key, valStr);
+    
+    // Invalidate cache: Paksa reload dari DB di request selanjutnya biar data sinkron
+    settingsCache = null;
 }
-
-//==================
