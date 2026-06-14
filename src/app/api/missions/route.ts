@@ -110,7 +110,7 @@ if (!user) return NextResponse.json({ status: false, message: message.user.notFo
 const available = getAvailableMissions(user);
 let mDetails: any = null;
 for (const c of Object.values(available)) {
-mDetails = (c as any[]).find(m => m.id === missionId);
+mDetails = (c as any[]).find((m: any) => m.id === missionId);
 if (mDetails) break;
 }
 if (!mDetails) return NextResponse.json({ status: false, message: message.mission.notFound }, { status: 404 });

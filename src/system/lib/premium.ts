@@ -207,7 +207,7 @@ export async function completeMission(username: string, missionId: string, rewar
             }
             // If it's a new day, clear daily missions from completed list
             if (lastDate !== nowDate) {
-                missions.completed = missions.completed.filter(id => !id.startsWith("daily_"));
+                missions.completed = missions.completed.filter((id: string) => !id.startsWith("daily_"));
                 missions.lastClaimedDaily = Date.now();
             }
         } else if (isDaily) {
