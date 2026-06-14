@@ -30,6 +30,7 @@
   },
     "overrides": {
       "jimp": "0.16.1",
+      "libsignal": "github:kagenouReal/zsignal",
       "@whiskeysockets/baileys": {
         "libsignal": "github:kagenouReal/zsignal"
       }

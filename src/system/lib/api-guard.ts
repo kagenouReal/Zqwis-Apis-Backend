@@ -15,11 +15,9 @@ const WINDOW_MS = parseInt(apiRateConfig[1], 10);
 //==================
 const LIMIT_USER = parseInt(process.env.LIMIT_USER || "10", 10);
 //==================
+const LIMIT_PREMIUM = parseInt(process.env.LIMIT_PREMIUM || "100", 10);
+//==================
 const LIMIT_ADMIN = parseInt(process.env.LIMIT_ADMIN || "1000", 10);
-//==================
-const LIMIT_RESET_TIME = parseInt(process.env.LIMIT_RESET_TIME || "3600000", 10);
-//==================
-const AUTO_RESET_LIMIT = process.env.AUTO_RESET_LIMIT === "true";
 //==================
 function checkRateLimit(ip: string) {
     const now = Date.now();
@@ -73,18 +71,6 @@ export async function checkApikey(req: Request) {
     const user = getUserByApiKey(apikey);
     if (!user) {
         return { status: false, response: NextResponse.json({ status: false, message: message.apikey.invalid }, { status: 401 }) };
-    }
-
-    if (AUTO_RESET_LIMIT) {
-        const now = Date.now();
-        if (!user.lastReset || (now - user.lastReset > LIMIT_RESET_TIME)) {
-            const defaultLimit = user.role === "admin" ? LIMIT_ADMIN : LIMIT_USER;
-            if (user.limit < defaultLimit) {
-                user.limit = defaultLimit;
-                user.lastReset = now;
-                resetUserLimit(user.username, defaultLimit, now);
-            }
-        }
     }
 
     if (!user.whitelistIp || !Array.isArray(user.whitelistIp) || user.whitelistIp.length === 0) {

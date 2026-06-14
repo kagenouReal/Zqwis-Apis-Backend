@@ -190,12 +190,29 @@ export async function checkMission(username: string, missionId: string) {
 }
 
 //==================
-export async function completeMission(username: string, missionId: string, reward: number = 0) {
+export async function completeMission(username: string, missionId: string, reward: number = 0, rewardType: 'coins' | 'limit' = 'coins') {
     try {
         const user = getUserByUsername(username);
         if (!user) return { status: false, error: message.user.notFound };
-        const missions = user.missions || { completed: [] };
+        const missions = user.missions || { completed: [], lastClaimedDaily: null };
         const activity = user.activity || { lastLogin: null, loginStreak: 0, totalLogins: 0, apiCalls: 0 };
+
+        // Handle Daily Reset logic for specific missions
+        const isDaily = missionId.startsWith("daily_");
+        if (isDaily && missions.lastClaimedDaily) {
+            const lastDate = new Date(missions.lastClaimedDaily).toDateString();
+            const nowDate = new Date().toDateString();
+            if (lastDate === nowDate && missions.completed.includes(missionId)) {
+                return { status: false, error: "Daily mission already completed today" };
+            }
+            // If it's a new day, clear daily missions from completed list
+            if (lastDate !== nowDate) {
+                missions.completed = missions.completed.filter(id => !id.startsWith("daily_"));
+                missions.lastClaimedDaily = Date.now();
+            }
+        } else if (isDaily) {
+            missions.lastClaimedDaily = Date.now();
+        }
 
         if (missions.completed.includes(missionId)) {
             return { status: false, error: "Mission already completed" };
@@ -203,6 +220,9 @@ export async function completeMission(username: string, missionId: string, rewar
 
         // Validation based on mission ID
         if (missionId === "daily_login") {
+            if (activity.totalLogins === 0) return { status: false, error: "You haven't logged in yet" };
+        } else if (missionId === "daily_limit") {
+            // Always allow if logged in, just as a daily bonus
             if (activity.totalLogins === 0) return { status: false, error: "You haven't logged in yet" };
         } else if (missionId === "api_call_10") {
             if ((activity.dailyApiCalls || 0) < 10) return { status: false, error: "You need at least 10 API calls today" };
@@ -220,10 +240,15 @@ export async function completeMission(username: string, missionId: string, rewar
         updateUserMissions(username, missions);
         
         if (reward > 0) {
-            await addCoins(username, reward, `Mission completed: ${missionId}`);
+            if (rewardType === 'limit') {
+                const newLimit = (user.limit || 0) + reward;
+                updateUserLimit(username, newLimit);
+            } else {
+                await addCoins(username, reward, `Mission completed: ${missionId}`);
+            }
         }
 
-        return { status: true, message: `Mission ${missionId} completed!` };
+        return { status: true, message: `Mission ${missionId} completed!`, reward, rewardType };
     } catch (e: unknown) {
         return { status: false, error: (e as Error).message || message.status.error };
     }
