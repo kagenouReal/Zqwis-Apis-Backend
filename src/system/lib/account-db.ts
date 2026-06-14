@@ -60,9 +60,9 @@ export async function writeDB(data: any[]) {
     const insert = db.prepare(`
         INSERT OR REPLACE INTO users (
             username, password, role, apikey, "limit", maxIpQuota, 
-            whitelistIp, lastReset, createdAt, premiumStatus, 
+            whitelistIp, createdAt, premiumStatus, 
             coins, coinHistory, missions, activity
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const transaction = db.transaction((users) => {
@@ -75,7 +75,6 @@ export async function writeDB(data: any[]) {
                 user.limit,
                 user.maxIpQuota,
                 JSON.stringify(user.whitelistIp),
-                user.lastReset,
                 user.createdAt,
                 JSON.stringify(user.premiumStatus),
                 JSON.stringify(user.coins),

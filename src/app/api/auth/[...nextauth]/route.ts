@@ -2,8 +2,9 @@ import NextAuth from "next-auth";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { readDB, comparePassword, getUserByUsername, updateUserActivity } from "@/system/lib/account-db";
-import { NextRequest } from "next/server";
-//==================
+import { NextRequest, NextResponse } from "next/server";
+import { verifyLoginHash } from "@/system/lib/security";
+
 export const authOptions: NextAuthOptions = {
 providers: [
 CredentialsProvider({
@@ -30,7 +31,6 @@ if (user) {
     const isPasswordCorrect = await comparePassword(credentials.password, user.password);
     if (!isPasswordCorrect) return null;
 
-    // Update activity
     const activity = user.activity || { lastLogin: null, loginStreak: 0, totalLogins: 0, apiCalls: 0 };
     const now = Date.now();
     const today = new Date().toDateString();
@@ -98,10 +98,17 @@ strategy: "jwt",
 },
 secret: process.env.NEXTAUTH_SECRET,
 };
-//==================
+
 const authHandler = NextAuth(authOptions);
-//==================
+
 const handler = async (req: NextRequest, ctx: any) => {
+if (req.method === "POST" && req.nextUrl.pathname.includes("/callback/credentials")) {
+    const ts = req.headers.get("x-zqwis-ts");
+    const auth = req.headers.get("x-zqwis-auth");
+    if (!verifyLoginHash(ts, auth)) {
+        return NextResponse.json({ status: false, message: "Unauthorized UI detected." }, { status: 403 });
+    }
+}
 const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
 const protocol = req.headers.get("x-forwarded-proto") || (host?.includes("localhost") || host?.includes("0.0.0.0") ? "http" : "https");
 if (host) {

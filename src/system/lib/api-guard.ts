@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getUserByApiKey, updateUserLimit, resetUserLimit, updateUserActivity } from "@/system/lib/account-db";
+import { getUserByApiKey, updateUserLimit, updateUserActivity } from "@/system/lib/account-db";
 import { message } from "@/system/lib/responses";
 import { getSettings } from "@/system/lib/owner";
 //==================

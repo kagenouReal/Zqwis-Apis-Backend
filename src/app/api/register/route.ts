@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import { message } from "@/system/lib/responses";
 import { getUserByUsername, generateApiKey, hashPassword, writeDB } from "@/system/lib/account-db";
-//==================
-const userLimit = parseInt(process.env.LIMIT_USER || "10", 10);
-//==================
-const ipLimit = parseInt(process.env.LIMIT_IP_USER || "3", 10);
+import { verifyLoginHash } from "@/system/lib/security";
+
 //==================
 export async function POST(req: Request) {
     try {
+        const ts = req.headers.get("x-zqwis-ts");
+        const auth = req.headers.get("x-zqwis-auth");
+        if (!verifyLoginHash(ts, auth)) {
+            return NextResponse.json({ status: false, message: "Unauthorized UI detected." }, { status: 403 });
+        }
+
         const { username, password } = await req.json();
         if (!username || !password) {
             return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
@@ -29,10 +33,9 @@ export async function POST(req: Request) {
             password: hashedPassword,
             role: "user",
             apikey: generateApiKey(),
-            limit: userLimit,
-            maxIpQuota: ipLimit,
+            limit: parseInt(process.env.LIMIT_USER || "10", 10),
+            maxIpQuota: parseInt(process.env.LIMIT_IP_USER || "3", 10),
             whitelistIp: [],
-            lastReset: Date.now(),
             createdAt: new Date().toISOString(),
             premiumStatus: {
                 isPremium: false,
