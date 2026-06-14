@@ -29,12 +29,12 @@
     "ws": "^8.20.0"
   },
     "overrides": {
-    "@whiskeysockets/baileys": {
-      "jimp": "0.16.1",
-      "libsignal": "github:kagenouReal/zsignal"
-    }
-  }
-  "devDependencies": {
+      "@whiskeysockets/baileys": {
+        "jimp": "0.16.1",
+        "libsignal": "github:kagenouReal/zsignal"
+      }
+    },
+    "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.13",
