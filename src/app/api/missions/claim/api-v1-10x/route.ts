@@ -10,7 +10,7 @@ if (!token?.name) return NextResponse.json({ status: false, message: message.aut
 try {
 const user = getUserByUsername(token.name);
 if (!user) return NextResponse.json({ status: false, message: message.user.notFound }, { status: 404 });
-const mId = "api_call_10";
+const mId = "daily_api_call_10";
 const available = getAvailableMissions(user);
 let mDetails: any = null;
 for (const c of Object.values(available)) {

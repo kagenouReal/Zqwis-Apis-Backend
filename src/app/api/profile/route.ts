@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
             maxIpQuota: user.maxIpQuota || 0,
             whitelistIp: user.whitelistIp || [],
             isRoot: false,
+            activity: user.activity || {},
             premium: premiumResult.status ? {
                 isPremium: premiumResult.isPremium,
                 type: premiumResult.type,
@@ -64,7 +65,6 @@ export async function GET(req: NextRequest) {
             coinHistory: user.coinHistory || [],
             missions: user.missions || { completed: [] },
             createdAt: user.createdAt,
-            activity: user.activity || {},
         }
     });
 }

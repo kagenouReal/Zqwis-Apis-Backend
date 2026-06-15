@@ -62,9 +62,9 @@ export async function POST(req: Request) {
                 inProgress: [],
             },
             activity: {
-                lastLogin: null,
-                loginStreak: 0,
-                totalLogins: 0,
+                lastLogin: Date.now(),
+                loginStreak: 1,
+                totalLogins: 1,
                 apiCalls: 0,
                 dailyApiCalls: 0,
             },

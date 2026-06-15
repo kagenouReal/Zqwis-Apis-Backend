@@ -30,7 +30,7 @@ for (const cat of Object.keys(data)) {
         if (!m.isCompleted) {
             if (m.id === "daily_limit") m.canClaim = true;
             else if (m.id === "daily_login") m.canClaim = activity.totalLogins > 0;
-            else if (m.id === "api_call_10") m.canClaim = (activity.dailyApiCalls || 0) >= 10;
+            else if (m.id === "daily_api_call_10") m.canClaim = (activity.dailyApiCalls || 0) >= 10;
             else if (m.id === "weekly_login_7") m.canClaim = (activity.loginStreak || 0) >= 7;
             else if (m.id === "game_play_1") m.canClaim = (activity.gamePlayed || 0) >= 1;
             else if (m.id === "game_win_3") m.canClaim = (activity.gameWins || 0) >= 3;

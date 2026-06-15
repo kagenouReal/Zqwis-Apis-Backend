@@ -6,7 +6,7 @@ export const MISSION_LIST = {
     daily: [
         { id: "daily_limit", name: "Daily API Limit", reward: 10, rewardType: "limit" }, 
         { id: "daily_login", name: "Daily Login Bonus", reward: 10 }, 
-        { id: "api_call_10", name: "Use API v1 (10x)", reward: 50 }
+        { id: "daily_api_call_10", name: "Use API v1 (10x)", reward: 50 }
     ],
     weekly: [{ id: "weekly_login_7", name: "7 Days Streak", reward: 200 }],
     social: [
@@ -28,34 +28,33 @@ export function getAvailableMissions(user: any) {
     return data;
 }
 
-export async function checkMission(username: string, missionId: string) {
-    try {
-        const user = getUserByUsername(username);
-        if (!user) return { status: false, error: message.user.notFound };
-        const missions = user.missions || { completed: [] };
-        return { status: true, completed: missions.completed.includes(missionId) };
-    } catch (e: unknown) {
-        return { status: false, error: (e as Error).message || message.status.error };
-    }
-}
-
 export async function completeMission(username: string, missionId: string, reward: number = 0, rewardType: 'coins' | 'limit' = 'coins') {
     try {
         const user = getUserByUsername(username);
         if (!user) return { status: false, error: message.user.notFound };
-        const missions = user.missions || { completed: [], lastClaimedDaily: null };
-        const activity = user.activity || { lastLogin: null, loginStreak: 0, totalLogins: 0, apiCalls: 0 };
+        
+        // Robust initialization
+        const missions = {
+            completed: user.missions?.completed || [],
+            lastClaimedDaily: user.missions?.lastClaimedDaily || null
+        };
+        const activity = {
+            totalLogins: user.activity?.totalLogins || 0,
+            dailyApiCalls: user.activity?.dailyApiCalls || 0,
+            loginStreak: user.activity?.loginStreak || 0
+        };
 
         const isDaily = missionId.startsWith("daily_");
         if (isDaily && missions.lastClaimedDaily) {
             const lastDate = new Date(missions.lastClaimedDaily).toDateString();
             const nowDate = new Date().toDateString();
-            if (lastDate === nowDate && missions.completed.includes(missionId)) {
-                return { status: false, error: "Daily mission already completed today" };
-            }
+            
             if (lastDate !== nowDate) {
+                // Reset daily missions
                 missions.completed = missions.completed.filter((id: string) => !id.startsWith("daily_"));
                 missions.lastClaimedDaily = Date.now();
+            } else if (missions.completed.includes(missionId)) {
+                return { status: false, error: "Daily mission already completed today" };
             }
         } else if (isDaily) {
             missions.lastClaimedDaily = Date.now();
@@ -65,14 +64,13 @@ export async function completeMission(username: string, missionId: string, rewar
             return { status: false, error: "Mission already completed" };
         }
 
-        if (missionId === "daily_login") {
+        // Mission specific checks
+        if (missionId === "daily_login" || missionId === "daily_limit") {
             if (activity.totalLogins === 0) return { status: false, error: "You haven't logged in yet" };
-        } else if (missionId === "daily_limit") {
-            if (activity.totalLogins === 0) return { status: false, error: "You haven't logged in yet" };
-        } else if (missionId === "api_call_10") {
-            if ((activity.dailyApiCalls || 0) < 10) return { status: false, error: "You need at least 10 API calls today" };
+        } else if (missionId === "daily_api_call_10") {
+            if (activity.dailyApiCalls < 10) return { status: false, error: "You need at least 10 API calls today" };
         } else if (missionId === "weekly_login_7") {
-            if ((activity.loginStreak || 0) < 7) return { status: false, error: "You need a 7-day login streak" };
+            if (activity.loginStreak < 7) return { status: false, error: "You need a 7-day login streak" };
         } else if (missionId === "first_premium") {
             if (!user.premiumStatus?.isPremium) return { status: false, error: "You must be a premium member to claim this" };
         }
@@ -89,17 +87,7 @@ export async function completeMission(username: string, missionId: string, rewar
             }
         }
 
-        return { status: true, message: `Mission ${missionId} completed!`, reward, rewardType };
-    } catch (e: unknown) {
-        return { status: false, error: (e as Error).message || message.status.error };
-    }
-}
-
-export async function getMissions(username: string) {
-    try {
-        const user = getUserByUsername(username);
-        if (!user) return { status: false, error: message.user.notFound };
-        return { status: true, missions: user.missions || { completed: [] } };
+        return { status: true, message: `Mission completed!`, reward, rewardType };
     } catch (e: unknown) {
         return { status: false, error: (e as Error).message || message.status.error };
     }

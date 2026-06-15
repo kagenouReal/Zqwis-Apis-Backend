@@ -9,7 +9,16 @@ if (token?.role !== "admin" && token?.role !== "owner") return NextResponse.json
 try {
 const { username, password, role } = await req.json();
 if (!username || !password) return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
+
+// Cegah duplikasi username database
 if (getUserByUsername(username)) return NextResponse.json({ status: false, message: message.user.exists }, { status: 400 });
+
+// CEK KHUSUS: Cegah duplikasi username yang sama dengan OWNER di .env
+const rootOwner = process.env.OWNER_USER;
+if (rootOwner && username.toLowerCase() === rootOwner.toLowerCase()) {
+    return NextResponse.json({ status: false, message: "Username is reserved for Root Owner." }, { status: 400 });
+}
+
 const hashed = await hashPassword(password);
 const newUser = {
     username, password: hashed, role: role || "user", apikey: generateApiKey(),
