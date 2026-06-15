@@ -57,15 +57,15 @@ try {
 const { searchParams } = new URL(req.url);
 const query = searchParams.get("query");
 if (!query) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
 }
 const result = await searchMudahMy(query);
 if (!result || !result.status || !result.data) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.scrape.noResult }, { status: 404 });
 }
-addSuccess();
+addSuccess(auth.user.username);
 return NextResponse.json({
 status: true,
 message: message.status.success,
@@ -74,7 +74,7 @@ limit_left: auth.user?.role === "user" ? auth.user.limit : 999999,
 data: result.data
 }, { status: 200 });
 } catch (err) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
 }
 }

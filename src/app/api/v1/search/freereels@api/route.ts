@@ -126,17 +126,17 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const keyword = searchParams.get("keyword");
         if (!keyword) {
-            addFail();
+            addFail(auth.user.username);
             return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
         }
 
         const result = await searchFreeReels(keyword);
         if (!result.status) {
-            addFail();
+            addFail(auth.user.username);
             return NextResponse.json({ status: false, message: result.error || message.scrape.fetchFailed }, { status: 500 });
         }
 
-        addSuccess();
+        addSuccess(auth.user.username);
         return NextResponse.json({
             status: true,
             message: message.status.success,
@@ -144,7 +144,7 @@ export async function GET(req: Request) {
             data: result
         });
     } catch (err) {
-        addFail();
+        addFail(auth.user.username);
         return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
     }
 }

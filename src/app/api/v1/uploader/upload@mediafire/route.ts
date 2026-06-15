@@ -221,7 +221,7 @@ await req.formData();
 const file =
 form.get("file") as File;
 if (!file) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json(
 {
 status: false,
@@ -249,7 +249,7 @@ if (body.url) {
 const fetchFile =
 await fetch(body.url);
 if (!fetchFile.ok) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json(
 {
 status: false,
@@ -276,7 +276,7 @@ filename =
 body.filename || filename;
 }
 else {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json(
 {
 status: false,
@@ -290,7 +290,7 @@ status: 400
 }
 }
 else {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json(
 {
 status: false,
@@ -303,7 +303,7 @@ status: 400
 );
 }
 if (!buffer) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json(
 {
 status: false,
@@ -327,7 +327,7 @@ await mf.upload(
 buffer,
 filename
 );
-addSuccess();
+addSuccess(auth.user.username);
 return NextResponse.json(
 {
 status: true,
@@ -345,7 +345,7 @@ status: 200
 }
 );
 } catch (err: any) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json(
 {
 status: false,

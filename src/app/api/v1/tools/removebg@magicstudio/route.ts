@@ -33,7 +33,7 @@ if (contentType.includes("multipart/form-data")) {
 const formData = await req.formData();
 const file = formData.get("image") as File;
 if (!file) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.file.missing }, { status: 400 });
 }
 const arrayBuffer = await file.arrayBuffer();
@@ -44,26 +44,26 @@ const body = await req.json().catch(() => ({}));
 if (body.url) {
 const imgRes = await fetch(body.url);
 if (!imgRes.ok) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.api.fetchFailed }, { status: 400 });
 }
 buffer = Buffer.from(await imgRes.arrayBuffer());
 } else if (body.base64) {
 buffer = Buffer.from(body.base64, "base64");
 } else {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
 }
 } else {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.input.invalidFormat }, { status: 400 });
 }
 if (!buffer) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.file.invalid }, { status: 500 });
 }
 const result = await removeBg(buffer);
-addSuccess();
+addSuccess(auth.user.username);
 return NextResponse.json({
 status: true,
 message: message.status.success,
@@ -72,7 +72,7 @@ limit_left: auth.user?.role === "user" ? auth.user.limit : 999999,
 data: result
 }, { status: 200 });
 } catch (err: any) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({
 status: false,
 message: message.api.serverError

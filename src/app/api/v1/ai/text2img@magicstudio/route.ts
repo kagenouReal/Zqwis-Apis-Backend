@@ -32,15 +32,15 @@ try {
 const { searchParams } = new URL(req.url);
 const prompt = searchParams.get("prompt");
 if (!prompt) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
 }
 const result = await aiIMGGenerator(prompt);
 if (!result.status || !result.buffer) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.scrape.fetchFailed }, { status: 500 });
 }
-addSuccess();
+addSuccess(auth.user.username);
 return NextResponse.json({
 status: true,
 message: message.status.success,
@@ -52,7 +52,7 @@ buffer: result.buffer.toString("base64")
 }
 }, { status: 200 });
 } catch (err) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
 }
 }

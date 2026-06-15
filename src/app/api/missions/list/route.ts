@@ -13,7 +13,13 @@ if (!user) return NextResponse.json({ status: false, message: message.user.notFo
 
 const available = getAvailableMissions(user);
 const completed = user.missions?.completed || [];
-const activity = user.activity || { lastLogin: null, loginStreak: 0, totalLogins: 0, apiCalls: 0, dailyApiCalls: 0, gamePlayed: 0, gameWins: 0 };
+const activity = {
+    totalLogins: user.activity?.totalLogins || 0,
+    dailyApiCalls: user.activity?.dailyApiCalls || 0,
+    loginStreak: user.activity?.loginStreak || 0,
+    gamePlayed: user.activity?.gamePlayed || 0,
+    gameWins: user.activity?.gameWins || 0
+};
 const lastClaimedDaily = user.missions?.lastClaimedDaily || 0;
 
 const data: any = JSON.parse(JSON.stringify(available));

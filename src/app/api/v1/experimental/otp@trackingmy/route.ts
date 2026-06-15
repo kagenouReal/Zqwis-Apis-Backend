@@ -41,7 +41,7 @@ const now = Date.now();
 const lastReqTime = cooldownMap.get(username);
 if (lastReqTime && (now - lastReqTime < 3000)) {
 const timeLeft = ((3000 - (now - lastReqTime)) / 1000).toFixed(1);
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({
 status: false,
 message: message.api.rateLimit
@@ -52,19 +52,19 @@ try {
 const body = await req.json().catch(() => ({}));
 const { phone } = body;
 if (!phone) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
 }
 const result = await reqTrackingMy(phone);
 if (!result || !result.status) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({
 status: false,
 message: message.scrape.fetchFailed,
 errorDetail: result?.error
 }, { status: 500 });
 }
-addSuccess();
+addSuccess(auth.user.username);
 return NextResponse.json({
 status: true,
 message: message.status.success,
@@ -73,7 +73,7 @@ limit_left: auth.user?.role === "user" ? auth.user.limit : 999999,
 data: result.data
 }, { status: 200 });
 } catch (err) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
 }
 }

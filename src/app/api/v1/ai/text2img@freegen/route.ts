@@ -45,15 +45,15 @@ try {
 const { searchParams } = new URL(req.url);
 const prompt = searchParams.get("prompt");
 if (!prompt) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
 }
 const result: any = await freegen(prompt);
 if (!result || !result.status) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.scrape.fetchFailed }, { status: 500 });
 }
-addSuccess();
+addSuccess(auth.user.username);
 return NextResponse.json({
 status: true,
 message: message.status.success,
@@ -62,7 +62,7 @@ limit_left: auth.user?.role === "user" ? auth.user.limit : 999999,
 data: { mimetype: "image/png", buffer: result.buffer }
 }, { status: 200 });
 } catch (err) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
 }
 }

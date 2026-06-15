@@ -66,7 +66,10 @@ export async function completeMission(username: string, missionId: string, rewar
 
         // Mission specific checks
         if (missionId === "daily_login" || missionId === "daily_limit") {
-            if (activity.totalLogins === 0) return { status: false, error: "You haven't logged in yet" };
+            // Biar user baru tetep bisa claim, kita anggap mereka udah login minimal sekali pas daftar
+            if (activity.totalLogins === 0) {
+                activity.totalLogins = 1;
+            }
         } else if (missionId === "daily_api_call_10") {
             if (activity.dailyApiCalls < 10) return { status: false, error: "You need at least 10 API calls today" };
         } else if (missionId === "weekly_login_7") {

@@ -67,6 +67,9 @@ export async function POST(req: Request) {
                 totalLogins: 1,
                 apiCalls: 0,
                 dailyApiCalls: 0,
+                totalSuccess: 0,
+                totalFailed: 0,
+                lastCrash: null,
             },
         };
         

@@ -133,15 +133,15 @@ try {
 const body = await req.json().catch(() => ({}));
 const { robotId, prompt } = body;
 if (!robotId || !prompt) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
 }
 const result: any = await chatHiWaifu(robotId, prompt);
 if (!result || !result.status) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.scrape.fetchFailed }, { status: 500 });
 }
-addSuccess();
+addSuccess(auth.user.username);
 return NextResponse.json({
 status: true,
 message: message.status.success,
@@ -150,7 +150,7 @@ limit_left: auth.user?.role === "user" ? auth.user.limit : 999999,
 data: { reply: result.reply }
 }, { status: 200 });
 } catch (err) {
-addFail();
+addFail(auth.user.username);
 return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
 }
 }

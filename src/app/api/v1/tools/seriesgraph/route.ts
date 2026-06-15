@@ -292,17 +292,17 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const query = searchParams.get("query");
         if (!query) {
-            addFail();
+            addFail(auth.user.username);
             return NextResponse.json({ status: false, message: message.input.missing }, { status: 400 });
         }
 
         const result = await generateSeriesGraph(query);
         if (!result.status || !result.buffer) {
-            addFail();
+            addFail(auth.user.username);
             return NextResponse.json({ status: false, message: result.error || message.scrape.fetchFailed }, { status: 500 });
         }
 
-        addSuccess();
+        addSuccess(auth.user.username);
         return NextResponse.json({
             status: true,
             message: message.status.success,
@@ -314,7 +314,7 @@ export async function GET(req: Request) {
             }
         });
     } catch (err) {
-        addFail();
+        addFail(auth.user.username);
         return NextResponse.json({ status: false, message: message.api.serverError }, { status: 500 });
     }
 }

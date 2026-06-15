@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getUserByApiKey, updateUserLimit, updateUserActivity } from "@/system/lib/account-db";
+import { getUserByApiKey, getUserByUsername, updateUserLimit, updateUserActivity } from "@/system/lib/account-db";
 import { message } from "@/system/lib/responses";
 import { getSettings } from "@/system/lib/owner";
 //==================
@@ -89,15 +89,32 @@ export async function checkApikey(req: Request) {
     updateUserLimit(user.username, user.limit);
 
     // Update activity
-    const activity = user.activity || { lastLogin: null, loginStreak: 0, totalLogins: 0, apiCalls: 0, dailyApiCalls: 0 };
+    const activity = user.activity || {};
     activity.apiCalls = (activity.apiCalls || 0) + 1;
-    
-    // Only count v1 API calls for missions
-    if (path.startsWith("/api/v1")) {
-        activity.dailyApiCalls = (activity.dailyApiCalls || 0) + 1;
-    }
+    activity.dailyApiCalls = (activity.dailyApiCalls || 0) + 1;
     
     updateUserActivity(user.username, activity);
     
     return { status: true, user };
+}
+
+//==================
+// New helpers to track per-user stats similar to Live Metrics
+export function trackUserSuccess(username: string) {
+    if (username === "owner") return;
+    const user = getUserByUsername(username);
+    if (!user) return;
+    const activity = user.activity || {};
+    activity.totalSuccess = (activity.totalSuccess || 0) + 1;
+    updateUserActivity(username, activity);
+}
+
+export function trackUserFail(username: string) {
+    if (username === "owner") return;
+    const user = getUserByUsername(username);
+    if (!user) return;
+    const activity = user.activity || {};
+    activity.totalFailed = (activity.totalFailed || 0) + 1;
+    activity.lastCrash = new Date().toISOString();
+    updateUserActivity(username, activity);
 }
