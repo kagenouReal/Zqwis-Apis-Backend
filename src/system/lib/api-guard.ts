@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { getUserByApiKey, getUserByUsername, updateUserLimit, updateUserActivity } from "@/system/lib/account-db";
 import { message } from "@/system/lib/responses";
 import { getSettings } from "@/system/lib/owner";
+import { trackUserSuccess } from "@/system/lib/request-stats";
 //==================
 const systemIps = ["127.0.0.1", "::1", "::ffff:127.0.0.1", "localhost"];
 //==================
