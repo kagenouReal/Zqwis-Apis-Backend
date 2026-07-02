@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { getUserByApiKey, getUserByUsername, updateUserLimit, updateUserActivity } from "@/system/lib/account-db";
 import { message } from "@/system/lib/responses";
 import { getSettings } from "@/system/lib/owner";
-import { trackUserSuccess } from "@/system/lib/request-stats";
+import { addSuccess } from "@/system/lib/request-stats";
 //==================
 const systemIps = ["127.0.0.1", "::1", "::ffff:127.0.0.1", "localhost"];
 //==================
@@ -100,22 +100,3 @@ export async function checkApikey(req: Request) {
 }
 
 //==================
-// New helpers to track per-user stats similar to Live Metrics
-export function trackUserSuccess(username: string) {
-    if (username === "owner") return;
-    const user = getUserByUsername(username);
-    if (!user) return;
-    const activity = user.activity || {};
-    activity.totalSuccess = (activity.totalSuccess || 0) + 1;
-    updateUserActivity(username, activity);
-}
-
-export function trackUserFail(username: string) {
-    if (username === "owner") return;
-    const user = getUserByUsername(username);
-    if (!user) return;
-    const activity = user.activity || {};
-    activity.totalFailed = (activity.totalFailed || 0) + 1;
-    activity.lastCrash = new Date().toISOString();
-    updateUserActivity(username, activity);
-}
