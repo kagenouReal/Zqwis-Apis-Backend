@@ -30,9 +30,16 @@ db.exec(`
         coins TEXT DEFAULT '{}',
         coinHistory TEXT DEFAULT '[]',
         missions TEXT DEFAULT '{}',
-        activity TEXT DEFAULT '{}'
+        activity TEXT DEFAULT '{}',
+        sessionToken TEXT
     );
 `);
+
+// Pastikan sessionToken sudah ada
+const tableInfo = db.prepare("PRAGMA table_info(users)").all() as any[];
+if (!tableInfo.find(column => column.name === 'sessionToken')) {
+    db.exec('ALTER TABLE users ADD COLUMN sessionToken TEXT');
+}
 
 db.exec(`
     CREATE TABLE IF NOT EXISTS settings (

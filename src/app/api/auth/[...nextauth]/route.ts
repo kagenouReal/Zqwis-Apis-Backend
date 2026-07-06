@@ -1,7 +1,8 @@
 import NextAuth from "next-auth";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { readDB, comparePassword, getUserByUsername, updateUserActivity } from "@/system/lib/account-db";
+import crypto from "crypto";
+import { readDB, comparePassword, getUserByUsername, updateUserActivity, updateSessionToken } from "@/system/lib/account-db";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyLoginHash } from "@/system/lib/security";
 
@@ -52,11 +53,15 @@ if (user) {
         updateUserActivity(user.username, activity);
     }
 
+    const sessionToken = crypto.randomBytes(32).toString("hex");
+    updateSessionToken(user.username, sessionToken);
+
     return {
     id: user.username,
     name: user.username,
     role: user.role || "user",
-    apikey: user.apikey
+    apikey: user.apikey,
+    sessionToken: sessionToken
     };
 }
 return null;
@@ -69,14 +74,14 @@ if (user) {
 token.role = (user as any).role;
 token.name = user.name;
 token.apikey = (user as any).apikey;
+token.sessionToken = (user as any).sessionToken;
 }
 if (token.name && token.name !== process.env.OWNER_USER) {
-const users = await readDB();
-const stillAlive = users.find((u: any) => u.username === token.name);
-if (!stillAlive) {
+const dbUser = getUserByUsername(token.name as string);
+if (!dbUser || dbUser.sessionToken !== token.sessionToken) {
 token.isDead = true;
 } else {
-token.apikey = stillAlive.apikey;
+token.apikey = dbUser.apikey;
 }
 }
 return token;

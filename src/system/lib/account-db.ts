@@ -87,8 +87,43 @@ export function getUserByUsername(username: string) {
     return mapUser(stmtSelectByUsername.get(username));
 }
 
+export function saveUser(user: any) {
+    db.prepare(`
+        UPDATE users SET 
+        "limit" = ?, 
+        maxIpQuota = ?, 
+        whitelistIp = ?, 
+        premiumStatus = ?, 
+        coins = ?, 
+        coinHistory = ?, 
+        missions = ?, 
+        activity = ?,
+        sessionToken = ?
+        WHERE username = ?
+    `).run(
+        user.limit,
+        user.maxIpQuota,
+        JSON.stringify(user.whitelistIp),
+        JSON.stringify(user.premiumStatus),
+        JSON.stringify(user.coins),
+        JSON.stringify(user.coinHistory),
+        JSON.stringify(user.missions),
+        JSON.stringify(user.activity),
+        user.sessionToken,
+        user.username
+    );
+}
+
+export function updateSessionToken(username: string, token: string | null) {
+    db.prepare('UPDATE users SET sessionToken = ? WHERE username = ?').run(token, username);
+}
+
 export function updateUserLimit(username: string, limit: number) {
-    stmtUpdateLimit.run(limit, username);
+    const user = getUserByUsername(username);
+    if (user) {
+        user.limit = limit;
+        saveUser(user);
+    }
 }
 
 export function resetUserLimit(username: string, limit: number, now: number) {
@@ -96,15 +131,28 @@ export function resetUserLimit(username: string, limit: number, now: number) {
 }
 
 export function updateUserCoins(username: string, coins: any, coinHistory: any[]) {
-    stmtUpdateCoins.run(JSON.stringify(coins), JSON.stringify(coinHistory), username);
+    const user = getUserByUsername(username);
+    if (user) {
+        user.coins = coins;
+        user.coinHistory = coinHistory;
+        saveUser(user);
+    }
 }
 
 export function updateUserPremium(username: string, premiumStatus: any) {
-    stmtUpdatePremium.run(JSON.stringify(premiumStatus), username);
+    const user = getUserByUsername(username);
+    if (user) {
+        user.premiumStatus = premiumStatus;
+        saveUser(user);
+    }
 }
 
 export function updateUserWhitelist(username: string, whitelistIp: string[]) {
-    stmtUpdateWhitelist.run(JSON.stringify(whitelistIp), username);
+    const user = getUserByUsername(username);
+    if (user) {
+        user.whitelistIp = whitelistIp;
+        saveUser(user);
+    }
 }
 
 export function updateUserAccount(username: string, data: { password?: string, username?: string, apikey?: string }) {
@@ -120,26 +168,30 @@ export function updateUserAccount(username: string, data: { password?: string, u
 }
 
 export function updateUserMissions(username: string, missions: any) {
-    stmtUpdateMissions.run(JSON.stringify(missions), username);
-}
-
-export function deleteUser(username: string) {
-    stmtDeleteUser.run(username);
-    const waDir = path.join(process.cwd(), "src/system/database/whatsapp");
-    if (fs.existsSync(waDir)) {
-        const entries = fs.readdirSync(waDir);
-        for (const entry of entries) {
-            if (entry.startsWith(`${username}_`)) {
-                fs.removeSync(path.join(waDir, entry));
-            }
-        }
+    const user = getUserByUsername(username);
+    if (user) {
+        user.missions = missions;
+        saveUser(user);
     }
 }
 
 export function updateUserIpQuota(username: string, quota: number) {
-    stmtUpdateIpQuota.run(quota, username);
+    const user = getUserByUsername(username);
+    if (user) {
+        user.maxIpQuota = quota;
+        saveUser(user);
+    }
 }
 
 export function updateUserActivity(username: string, activity: any) {
-    stmtUpdateActivity.run(JSON.stringify(activity), username);
+    const user = getUserByUsername(username);
+    if (user) {
+        user.activity = activity;
+        saveUser(user);
+    }
 }
+
+export function deleteUser(username: string) {
+    stmtDeleteUser.run(username);
+}
+
