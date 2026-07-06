@@ -25,13 +25,6 @@ export function getAvailableMissions(user: any) {
 
     const data: any = JSON.parse(JSON.stringify(MISSION_LIST));
     data.daily[0].reward = dailyLimitAmount;
-
-    // Pastikan setiap misi memiliki status canClaim: true
-    Object.keys(data).forEach(category => {
-        data[category].forEach((m: any) => {
-            m.canClaim = true;
-        });
-    });
     
     return data;
 }
