@@ -1,4 +1,4 @@
-import { getUserByUsername, updateUserMissions, updateUserLimit } from "@/system/lib/account-db";
+import { getUserByUsername, updateUserMissions, updateUserLimit, updateUserActivity } from "@/system/lib/account-db";
 import { message } from "@/system/lib/responses";
 import { addCoins } from "./products";
 
@@ -66,8 +66,10 @@ export async function completeMission(username: string, missionId: string, rewar
 
         // Mission specific checks
         if (missionId === "daily_login" || missionId === "daily_limit") {
-            // Biar user baru tetep bisa claim, kita anggap mereka udah login minimal sekali pas daftar
-            if (activity.totalLogins === 0) {
+            // Perbaikan: Update ke DB jika ini login pertama user
+            if (!user.activity || !user.activity.totalLogins || user.activity.totalLogins === 0) {
+                const newActivity = { ...(user.activity || {}), totalLogins: 1 };
+                updateUserActivity(username, newActivity);
                 activity.totalLogins = 1;
             }
         } else if (missionId === "daily_api_call_10") {
